@@ -1,10 +1,22 @@
 package com.crackers.store.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "products")
 public class Product {
+    @Id
     private String id;
+    
+    @Column(nullable = false)
     private String name;
+    
+    @Column(nullable = false)
     private String category;
+    
+    @Column(columnDefinition = "CLOB")
     private String description;
+    
     private String packSize;
     private double originalPrice;
     private double discountedPrice;
@@ -12,7 +24,10 @@ public class Product {
     private String soundLevel; // Low, Medium, High, Zero Sound
     private boolean kidSafe;
     private boolean greenCrackerCertified;
+
+    @Column(columnDefinition = "CLOB")
     private String image;
+    
     private int stock;
     private int rating;
     private String videoDemo;

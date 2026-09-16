@@ -3,6 +3,7 @@ package com.crackers.store.service;
 import com.crackers.store.model.OrderItem;
 import com.crackers.store.model.OrderRequest;
 import com.crackers.store.model.OrderResponse;
+import com.crackers.store.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
@@ -10,21 +11,21 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OrderService {
 
     private final ProductService productService;
-    private final Map<String, OrderResponse> orders = new ConcurrentHashMap<>();
+    private final OrderRepository orderRepository;
     private static final String STORE_WHATSAPP_NUMBER = "919442188990"; // Standard Sivakasi shop direct line format
 
-    public OrderService(ProductService productService) {
+    public OrderService(ProductService productService, OrderRepository orderRepository) {
         this.productService = productService;
+        this.orderRepository = orderRepository;
     }
 
     public OrderResponse createOrder(OrderRequest request) {
-        String orderId = "CRK-" + System.currentTimeMillis() % 1000000;
+        String orderId = "CRK-" + (System.currentTimeMillis() % 1000000);
         
         double actualValue = 0.0;
         double subtotal = 0.0;
@@ -73,16 +74,16 @@ public class OrderService {
         String encodedMsg = URLEncoder.encode(whatsappMsg, StandardCharsets.UTF_8);
         response.setWhatsappShareUrl("https://wa.me/" + STORE_WHATSAPP_NUMBER + "?text=" + encodedMsg);
 
-        orders.put(orderId, response);
-        return response;
+        // Save to H2 persistent database
+        return orderRepository.save(response);
     }
 
     public Optional<OrderResponse> getOrderById(String orderId) {
-        return Optional.ofNullable(orders.get(orderId));
+        return orderRepository.findById(orderId);
     }
 
     public List<OrderResponse> getAllOrders() {
-        return new ArrayList<>(orders.values());
+        return orderRepository.findAllByOrderByOrderDateDesc();
     }
 
     private String formatWhatsAppMessage(OrderResponse order) {

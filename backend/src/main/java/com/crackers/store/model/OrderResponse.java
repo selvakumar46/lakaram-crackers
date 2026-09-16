@@ -1,18 +1,30 @@
 package com.crackers.store.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Entity
+@Table(name = "customer_orders")
 public class OrderResponse {
+    @Id
     private String orderId;
+    
     private String status; // CONFIRMED, PENDING, DISPATCHED
     private LocalDateTime orderDate;
     private String customerName;
     private String phone;
+    
+    @Column(columnDefinition = "CLOB")
     private String deliveryAddress;
+    
     private String pincode;
     private String paymentMethod;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
     private List<OrderItem> items;
+    
     private int totalItemCount;
     private double actualValue;
     private double festiveDiscount;
@@ -20,6 +32,8 @@ public class OrderResponse {
     private double packingAndForwarding;
     private double grandTotal;
     private String estimatedDelivery;
+    
+    @Column(columnDefinition = "CLOB")
     private String whatsappShareUrl;
 
     public OrderResponse() {}

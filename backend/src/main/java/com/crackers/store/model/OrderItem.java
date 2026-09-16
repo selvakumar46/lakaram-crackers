@@ -1,5 +1,8 @@
 package com.crackers.store.model;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class OrderItem {
     private String productId;
     private String productName;
