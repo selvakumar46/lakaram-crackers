@@ -159,8 +159,8 @@ export default function QuickOrderSheet() {
                 </span>
               </div>
 
-              {/* Table Header */}
-              <div className="overflow-x-auto">
+              {/* Desktop Table View (Hidden on mobile) */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs sm:text-sm">
                   <thead className="bg-[#0e111d] text-slate-400 text-[11px] uppercase tracking-wider font-semibold border-b border-slate-800">
                     <tr>
@@ -244,20 +244,102 @@ export default function QuickOrderSheet() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Card List View (Optimized for Smartphones) */}
+              <div className="md:hidden divide-y divide-slate-800/80">
+                {items.map((prod) => {
+                  const qty = cart[prod.id] ? cart[prod.id].quantity : 0;
+                  const lineTotal = qty * prod.discountedPrice;
+
+                  return (
+                    <div 
+                      key={prod.id}
+                      className={`p-3 transition-colors ${qty > 0 ? 'bg-amber-500/10' : ''}`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <div>
+                          <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                            <span className="font-mono text-[10px] bg-slate-800 text-slate-400 px-1 rounded font-bold">
+                              {prod.id}
+                            </span>
+                            <span className="text-xs font-bold text-white leading-snug">
+                              {prod.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                            <span className="bg-[#181c2d] px-1.5 py-0.5 rounded text-amber-300 font-semibold">
+                              {prod.packSize}
+                            </span>
+                            <span>• {prod.soundLevel}</span>
+                            {prod.kidSafe && (
+                              <span className="text-blue-400 font-semibold">• Kid-Safe</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Price Display */}
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-sm font-black text-amber-400 block">
+                            ₹{prod.discountedPrice.toFixed(0)}
+                          </span>
+                          <span className="text-[10px] text-slate-500 line-through block">
+                            ₹{prod.originalPrice.toFixed(0)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Mobile Stepper & Row Subtotal */}
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/60">
+                        <span className="text-[11px] text-slate-400">
+                          {qty > 0 ? (
+                            <span className="font-bold text-white">Total: <span className="text-amber-400">₹{lineTotal.toFixed(0)}</span></span>
+                          ) : (
+                            <span className="text-slate-500">Enter quantity</span>
+                          )}
+                        </span>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => setItemQuantity(prod, qty - 1)}
+                            className="w-8 h-8 rounded-xl bg-[#181c2d] active:bg-red-600 text-slate-300 active:text-white flex items-center justify-center transition-colors text-xs border border-slate-700"
+                            disabled={qty === 0}
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <input
+                            type="number"
+                            min="0"
+                            value={qty === 0 ? '' : qty}
+                            placeholder="0"
+                            onChange={(e) => setItemQuantity(prod, e.target.value)}
+                            className="w-12 h-8 bg-[#0d0f19] border border-slate-700 rounded-xl text-center font-bold text-xs text-white focus:outline-none focus:border-amber-400"
+                          />
+                          <button
+                            onClick={() => setItemQuantity(prod, qty + 1)}
+                            className="w-8 h-8 rounded-xl bg-amber-500 active:bg-amber-400 text-slate-950 font-bold flex items-center justify-center transition-colors text-xs shadow-md"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))
         )}
       </div>
 
       {/* Sivakasi Fixed Bottom Live Calculation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#0e111d]/95 backdrop-blur-md border-t border-amber-500/30 p-3 sm:p-4 shadow-2xl">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#0e111d]/95 backdrop-blur-md border-t border-amber-500/30 p-2.5 sm:p-4 shadow-2xl safe-bottom">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3">
           {/* Summary stats */}
-          <div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-8">
+          <div className="flex items-center justify-between w-full sm:w-auto gap-2 sm:gap-8 px-1">
             <div>
-              <span className="text-[10px] text-slate-400 block uppercase font-semibold">Total Items</span>
-              <span className="text-sm sm:text-base font-extrabold text-white">
-                {totalItemCount} Units
+              <span className="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-semibold">Units</span>
+              <span className="text-xs sm:text-base font-extrabold text-white">
+                {totalItemCount}
               </span>
             </div>
 
@@ -269,15 +351,15 @@ export default function QuickOrderSheet() {
             </div>
 
             <div>
-              <span className="text-[10px] text-emerald-400 block uppercase font-semibold">Festive Savings (75%)</span>
-              <span className="text-sm sm:text-base font-extrabold text-emerald-400">
+              <span className="text-[9px] sm:text-[10px] text-emerald-400 block uppercase font-semibold">75% Savings</span>
+              <span className="text-xs sm:text-base font-extrabold text-emerald-400">
                 ₹{festiveSavings.toFixed(0)}
               </span>
             </div>
 
-            <div className="border-l border-slate-700 pl-4">
-              <span className="text-[10px] text-amber-400 block uppercase font-extrabold">Net Total</span>
-              <span className="text-lg sm:text-xl font-black text-amber-300">
+            <div className="border-l border-slate-700 pl-3 sm:pl-4">
+              <span className="text-[9px] sm:text-[10px] text-amber-400 block uppercase font-extrabold">Net Total</span>
+              <span className="text-base sm:text-xl font-black text-amber-300">
                 ₹{subtotal.toFixed(0)}
               </span>
             </div>
@@ -287,10 +369,10 @@ export default function QuickOrderSheet() {
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setIsCartOpen(true)}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1b2034] hover:bg-[#252b45] text-slate-200 text-xs font-bold border border-slate-700 transition-colors"
+              className="flex-shrink-0 flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#1b2034] hover:bg-[#252b45] text-slate-200 text-[11px] sm:text-xs font-bold border border-slate-700 transition-colors"
             >
-              <ShoppingBag className="w-4 h-4 text-amber-400" />
-              <span>View Cart ({totalItemCount})</span>
+              <ShoppingBag className="w-3.5 h-3.5 text-amber-400" />
+              <span>Cart ({totalItemCount})</span>
             </button>
 
             <button
@@ -302,14 +384,14 @@ export default function QuickOrderSheet() {
                 setIsCheckoutOpen(true);
               }}
               disabled={totalItemCount === 0}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs transition-all shadow-lg ${
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all shadow-lg active:scale-95 ${
                 totalItemCount > 0
                   ? 'bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-slate-950 shadow-amber-500/20'
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed'
               }`}
             >
-              <span>Instant Checkout / WhatsApp Order</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Instant WhatsApp Order</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

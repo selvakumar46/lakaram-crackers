@@ -65,42 +65,42 @@ export default function ProductCard({ product }) {
       </div>
 
       {/* Content Section */}
-      <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+      <div className="p-2.5 sm:p-4 flex flex-col flex-1 justify-between gap-2 sm:gap-3">
         <div>
           {/* Header & Pack details */}
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-bold text-white text-sm leading-snug group-hover:text-amber-300 transition-colors">
+          <div className="flex items-start justify-between gap-1 mb-1">
+            <h3 className="font-bold text-white text-xs sm:text-sm leading-snug group-hover:text-amber-300 transition-colors line-clamp-2">
               {product.name}
             </h3>
           </div>
 
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] bg-slate-800 text-amber-300 font-semibold px-2 py-0.5 rounded-md">
+          <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+            <span className="text-[10px] sm:text-[11px] bg-slate-800 text-amber-300 font-semibold px-1.5 sm:px-2 py-0.5 rounded-md">
               {product.packSize}
             </span>
-            <div className="flex items-center gap-0.5 text-amber-400 text-xs">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="text-[11px] font-bold text-slate-300">5.0</span>
+            <div className="flex items-center gap-0.5 text-amber-400 text-[10px] sm:text-xs">
+              <Star className="w-2.5 sm:w-3 h-2.5 sm:h-3 fill-amber-400 text-amber-400" />
+              <span className="font-bold text-slate-300">5.0</span>
             </div>
           </div>
 
-          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+          <p className="hidden sm:block text-xs text-slate-400 line-clamp-2 leading-relaxed">
             {product.description}
           </p>
         </div>
 
         {/* Price and Cart controls */}
         <div className="pt-2 border-t border-slate-800/80">
-          <div className="flex items-baseline justify-between mb-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-black text-white">
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2 sm:mb-3">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm sm:text-lg font-black text-white">
                 ₹{product.discountedPrice.toFixed(0)}
               </span>
-              <span className="text-xs text-slate-400 line-through">
+              <span className="text-[10px] sm:text-xs text-slate-400 line-through">
                 ₹{product.originalPrice.toFixed(0)}
               </span>
             </div>
-            <span className="text-[11px] text-emerald-400 font-semibold">
+            <span className="text-[9px] sm:text-[11px] text-emerald-400 font-semibold">
               Save ₹{(product.originalPrice - product.discountedPrice).toFixed(0)}
             </span>
           </div>
@@ -109,31 +109,31 @@ export default function ProductCard({ product }) {
           {quantity === 0 ? (
             <button
               onClick={() => addToCart(product, 1)}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[#1e2338] hover:bg-amber-500 text-slate-200 hover:text-slate-950 font-bold text-xs border border-amber-500/20 hover:border-transparent transition-all shadow-sm"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl bg-[#1e2338] hover:bg-amber-500 text-slate-200 hover:text-slate-950 font-bold text-[11px] sm:text-xs border border-amber-500/20 hover:border-transparent transition-all shadow-sm active:scale-95"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               <span>Add to Cart</span>
             </button>
           ) : (
-            <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/30 rounded-xl p-1">
+            <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/30 rounded-xl p-0.5 sm:p-1">
               <button
                 onClick={() => addToCart(product, -1)}
-                className="w-8 h-7 flex items-center justify-center rounded-lg bg-[#161a29] text-slate-200 hover:bg-red-600 hover:text-white transition-colors"
+                className="w-7 sm:w-8 h-6 sm:h-7 flex items-center justify-center rounded-lg bg-[#161a29] text-slate-200 hover:bg-red-600 hover:text-white transition-colors"
                 title="Decrease"
               >
-                <Minus className="w-3 h-3" />
+                <Minus className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
               </button>
               
-              <span className="text-xs font-black text-amber-300 px-2">
-                {quantity} in cart
+              <span className="text-[11px] sm:text-xs font-black text-amber-300 px-1 sm:px-2">
+                {quantity}
               </span>
 
               <button
                 onClick={() => addToCart(product, 1)}
-                className="w-8 h-7 flex items-center justify-center rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition-colors"
+                className="w-7 sm:w-8 h-6 sm:h-7 flex items-center justify-center rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition-colors"
                 title="Increase"
               >
-                <Plus className="w-3 h-3" />
+                <Plus className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
               </button>
             </div>
           )}
