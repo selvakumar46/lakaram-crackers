@@ -3,7 +3,7 @@ import { Sparkles, Phone, Mail, MapPin, ShieldCheck, Truck, Clock } from 'lucide
 import { useCart } from '../context/CartContext';
 
 export default function Footer() {
-  const { setIsSafetyModalOpen, setViewMode } = useCart();
+  const { setIsSafetyModalOpen, setIsAdminOpen, setViewMode } = useCart();
 
   return (
     <footer className="bg-[#090b12] border-t border-slate-800/80 text-slate-400 text-xs pt-12 pb-8">
@@ -58,6 +58,14 @@ export default function Footer() {
               </li>
               <li>
                 <span className="text-slate-500">Corporate & Wedding Fireworks Orders</span>
+              </li>
+              <li className="pt-1 border-t border-slate-800/80">
+                <button 
+                  onClick={() => setIsAdminOpen(true)}
+                  className="text-amber-400/80 hover:text-amber-300 font-semibold transition-colors flex items-center gap-1"
+                >
+                  <span>🔐 Store Manager Admin Login</span>
+                </button>
               </li>
             </ul>
           </div>

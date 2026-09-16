@@ -2,6 +2,23 @@ import { DEFAULT_PRODUCTS, CATEGORIES } from '../data/defaultProducts';
 
 const API_BASE = '/api';
 
+const getStoredCustomProducts = () => {
+  try {
+    const saved = localStorage.getItem('sparklefest_custom_products');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveCustomProducts = (list) => {
+  try {
+    localStorage.setItem('sparklefest_custom_products', JSON.stringify(list));
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const fetchProducts = async (category = null, search = null) => {
   try {
     const params = new URLSearchParams();
@@ -14,20 +31,22 @@ export const fetchProducts = async (category = null, search = null) => {
     const data = await res.json();
     return { data, source: 'backend' };
   } catch (err) {
-    console.info('Backend unreachable, using local product catalog:', err.message);
-    let filtered = [...DEFAULT_PRODUCTS];
+    const custom = getStoredCustomProducts();
+    let all = [...custom, ...DEFAULT_PRODUCTS.filter(dp => !custom.some(c => c.id === dp.id))];
+
     if (category && category !== 'all') {
-      filtered = filtered.filter(p => p.category === category);
+      all = all.filter(p => p.category === category);
     }
     if (search && search.trim()) {
       const q = search.toLowerCase().trim();
-      filtered = filtered.filter(p => 
+      all = all.filter(p => 
         p.name.toLowerCase().includes(q) || 
         p.category.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q)
+        p.description.toLowerCase().includes(q) ||
+        p.id.toLowerCase().includes(q)
       );
     }
-    return { data: filtered, source: 'local' };
+    return { data: all, source: 'local' };
   }
 };
 
@@ -53,6 +72,78 @@ export const checkBackendHealth = async () => {
   }
 };
 
+export const createProduct = async (productData) => {
+  // Always persist to local custom products list for standalone resilience
+  const custom = getStoredCustomProducts();
+  const updatedList = [productData, ...custom.filter(p => p.id !== productData.id)];
+  saveCustomProducts(updatedList);
+
+  try {
+    const res = await fetch(`${API_BASE}/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData)
+    });
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.info('Backend unreachable, product saved to browser storage:', err.message);
+    return productData;
+  }
+};
+
+export const updateProduct = async (id, productData) => {
+  const custom = getStoredCustomProducts();
+  const idx = custom.findIndex(p => p.id === id);
+  if (idx >= 0) {
+    custom[idx] = productData;
+  } else {
+    custom.push(productData);
+  }
+  saveCustomProducts(custom);
+
+  try {
+    const res = await fetch(`${API_BASE}/products/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData)
+    });
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return productData;
+  }
+};
+
+export const deleteProduct = async (id) => {
+  const custom = getStoredCustomProducts().filter(p => p.id !== id);
+  saveCustomProducts(custom);
+
+  try {
+    const res = await fetch(`${API_BASE}/products/${id}`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch (err) {
+    return true;
+  }
+};
+
+export const fetchOrders = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/orders`);
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    try {
+      const saved = localStorage.getItem('sparklefest_orders_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  }
+};
+
 export const submitOrder = async (orderPayload) => {
   try {
     const res = await fetch(`${API_BASE}/orders`, {
@@ -61,13 +152,14 @@ export const submitOrder = async (orderPayload) => {
       body: JSON.stringify(orderPayload)
     });
     if (!res.ok) throw new Error(`Server returned ${res.status}`);
-    return await res.json();
+    const orderRes = await res.json();
+    saveOrderLocally(orderRes);
+    return orderRes;
   } catch (err) {
     console.info('Backend order endpoint unreachable, creating client-side order confirmation:', err.message);
-    // Create client-side response with formatted WhatsApp URL
     const orderId = 'CRK-' + Math.floor(100000 + Math.random() * 900000);
     const subtotal = orderPayload.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const actualValue = subtotal * 4; // approx 75% festive discount
+    const actualValue = subtotal * 4;
     const festiveDiscount = actualValue - subtotal;
     const packingAndForwarding = subtotal > 3000 ? 0 : 150;
     const grandTotal = subtotal + packingAndForwarding;
@@ -97,7 +189,7 @@ export const submitOrder = async (orderPayload) => {
 
     const whatsappShareUrl = `https://wa.me/${storeNumber}?text=${encodeURIComponent(msg)}`;
 
-    return {
+    const orderRes = {
       orderId,
       status: 'CONFIRMED',
       orderDate: new Date().toISOString(),
@@ -116,5 +208,18 @@ export const submitOrder = async (orderPayload) => {
       estimatedDelivery: '3 to 5 business days via Sivakasi Transport Hub',
       whatsappShareUrl
     };
+
+    saveOrderLocally(orderRes);
+    return orderRes;
   }
 };
+
+function saveOrderLocally(order) {
+  try {
+    const list = JSON.parse(localStorage.getItem('sparklefest_orders_history') || '[]');
+    list.unshift(order);
+    localStorage.setItem('sparklefest_orders_history', JSON.stringify(list.slice(0, 50)));
+  } catch (e) {
+    console.error(e);
+  }
+}

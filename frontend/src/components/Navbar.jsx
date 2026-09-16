@@ -9,7 +9,8 @@ import {
   PhoneCall, 
   Server,
   Zap,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { checkBackendHealth } from '../services/api';
@@ -20,6 +21,7 @@ export default function Navbar() {
     subtotal, 
     setIsCartOpen, 
     setIsSafetyModalOpen,
+    setIsAdminOpen,
     viewMode,
     setViewMode,
     searchQuery,
@@ -147,6 +149,16 @@ export default function Navbar() {
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Safety Guide</span>
+            </button>
+
+            {/* Admin Console Button */}
+            <button
+              onClick={() => setIsAdminOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 bg-amber-950/40 border border-amber-500/30 hover:bg-amber-900/40 transition-colors"
+              title="Store Admin Console (Add Products, Stock, Orders)"
+            >
+              <Settings className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Admin</span>
             </button>
 
             {/* Cart Trigger */}

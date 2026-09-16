@@ -56,12 +56,24 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllCategories());
     }
 
-    @PatchMapping("/products/{id}/stock")
-    public ResponseEntity<Product> updateStock(@PathVariable String id, @RequestBody Map<String, Integer> body) {
-        int newStock = body.getOrDefault("stock", 0);
-        Product updated = productService.updateStock(id, newStock);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
+    @PostMapping("/products")
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        Product created = productService.createProduct(product);
+        return ResponseEntity.ok(created);
+    }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable String id, @RequestBody Product product) {
+        return productService.updateProduct(id, product)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<Map<String, Object>> deleteProduct(@PathVariable String id) {
+        boolean deleted = productService.deleteProduct(id);
+        if (deleted) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Product deleted"));
         }
         return ResponseEntity.notFound().build();
     }

@@ -9,10 +9,15 @@ import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import OrderSuccessModal from './components/OrderSuccessModal';
 import SafetyModal from './components/SafetyModal';
+import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
 
 function MainStore() {
-  const { viewMode } = useCart();
+  const { viewMode, isAdminOpen, setIsAdminOpen } = useCart();
+
+  if (isAdminOpen) {
+    return <AdminDashboard onClose={() => setIsAdminOpen(false)} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0c0e17] selection:bg-amber-500 selection:text-black">

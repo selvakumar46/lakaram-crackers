@@ -25,8 +25,9 @@ export const CartProvider = ({ children }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [completedOrder, setCompletedOrder] = useState(null);
 
   useEffect(() => {
@@ -159,6 +160,8 @@ export const CartProvider = ({ children }) => {
       setIsSafetyModalOpen,
       isCheckoutOpen,
       setIsCheckoutOpen,
+      isAdminOpen,
+      setIsAdminOpen,
       completedOrder,
       setCompletedOrder
     }}>

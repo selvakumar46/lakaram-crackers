@@ -292,4 +292,29 @@ public class ProductService {
         }
         return p;
     }
+
+    public Product createProduct(Product product) {
+        if (product.getId() == null || product.getId().trim().isEmpty()) {
+            product.setId("PRD-" + (System.currentTimeMillis() % 100000));
+        }
+        if (product.getDiscountedPrice() <= 0 && product.getOriginalPrice() > 0) {
+            int disc = product.getDiscountPercent() > 0 ? product.getDiscountPercent() : 75;
+            product.setDiscountedPrice(product.getOriginalPrice() * (100 - disc) / 100.0);
+        }
+        productMap.put(product.getId(), product);
+        return product;
+    }
+
+    public Optional<Product> updateProduct(String id, Product updated) {
+        if (!productMap.containsKey(id)) {
+            return Optional.empty();
+        }
+        updated.setId(id);
+        productMap.put(id, updated);
+        return Optional.of(updated);
+    }
+
+    public boolean deleteProduct(String id) {
+        return productMap.remove(id) != null;
+    }
 }
