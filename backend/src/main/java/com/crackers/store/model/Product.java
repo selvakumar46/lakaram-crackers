@@ -14,7 +14,7 @@ public class Product {
     @Column(nullable = false)
     private String category;
     
-    @Column(columnDefinition = "CLOB")
+    @Column(columnDefinition = "TEXT")
     private String description;
     
     private String packSize;
@@ -25,7 +25,7 @@ public class Product {
     private boolean kidSafe;
     private boolean greenCrackerCertified;
 
-    @Column(columnDefinition = "CLOB")
+    @Column(columnDefinition = "TEXT")
     private String image;
     
     private int stock;

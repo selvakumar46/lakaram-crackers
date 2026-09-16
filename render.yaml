@@ -21,4 +21,10 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://ep-sweet-bonus-azmv80s3-pooler.c-3.ap-southeast-1.aws.neon.tech:5432/neondb?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
+        value: neondb_owner
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: npg_SzMhVg42oPKi
     plan: free

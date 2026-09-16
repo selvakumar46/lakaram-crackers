@@ -15,7 +15,7 @@ public class OrderResponse {
     private String customerName;
     private String phone;
     
-    @Column(columnDefinition = "CLOB")
+    @Column(columnDefinition = "TEXT")
     private String deliveryAddress;
     
     private String pincode;
@@ -33,7 +33,7 @@ public class OrderResponse {
     private double grandTotal;
     private String estimatedDelivery;
     
-    @Column(columnDefinition = "CLOB")
+    @Column(columnDefinition = "TEXT")
     private String whatsappShareUrl;
 
     public OrderResponse() {}
