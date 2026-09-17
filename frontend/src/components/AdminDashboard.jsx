@@ -231,6 +231,7 @@ export default function AdminDashboard({ onClose }) {
   // Delete product
   const handleDeleteClick = async (id, name) => {
     if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+      setProducts(prev => prev.filter(p => p.id !== id));
       await deleteProduct(id);
       loadData();
     }

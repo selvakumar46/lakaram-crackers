@@ -2,6 +2,9 @@ import { DEFAULT_PRODUCTS, CATEGORIES } from '../data/defaultProducts';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
+// Track backend reachability in memory to avoid generating red 503 errors in console
+let backendOnline = null; // null: unknown, true: online, false: offline
+
 const getStoredCustomProducts = () => {
   try {
     const saved = localStorage.getItem('sparklefest_custom_products');
@@ -19,20 +22,51 @@ const saveCustomProducts = (list) => {
   }
 };
 
-export const fetchProducts = async (category = null, search = null) => {
+// Permanent deleted products list so deleted items never re-appear
+const getDeletedProductIds = () => {
   try {
-    const params = new URLSearchParams();
-    if (category && category !== 'all') params.append('category', category);
-    if (search) params.append('search', search);
+    const saved = localStorage.getItem('lakaram_deleted_products');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
 
-    const url = `${API_BASE}/products${params.toString() ? `?${params.toString()}` : ''}`;
-    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+const saveDeletedProductId = (id) => {
+  try {
+    const list = getDeletedProductIds();
+    if (!list.includes(id)) {
+      list.push(id);
+      localStorage.setItem('lakaram_deleted_products', JSON.stringify(list));
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const checkBackendHealth = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/health`);
+    if (!res.ok) {
+      backendOnline = false;
+      return false;
+    }
     const data = await res.json();
-    return { data, source: 'backend' };
-  } catch (err) {
-    const custom = getStoredCustomProducts();
-    let all = [...custom, ...DEFAULT_PRODUCTS.filter(dp => !custom.some(c => c.id === dp.id))];
+    backendOnline = (data.status === 'UP');
+    return backendOnline;
+  } catch (e) {
+    backendOnline = false;
+    return false;
+  }
+};
+
+export const fetchProducts = async (category = null, search = null) => {
+  const deletedIds = getDeletedProductIds();
+
+  // Helper for filtering local products
+  const getLocalProducts = () => {
+    const custom = getStoredCustomProducts().filter(p => !deletedIds.includes(p.id));
+    let all = [...custom, ...DEFAULT_PRODUCTS.filter(dp => !custom.some(c => c.id === dp.id) && !deletedIds.includes(dp.id))];
 
     if (category && category !== 'all') {
       all = all.filter(p => p.category === category);
@@ -47,28 +81,50 @@ export const fetchProducts = async (category = null, search = null) => {
       );
     }
     return { data: all, source: 'local' };
+  };
+
+  // If backend is already detected offline, serve from local cache without spamming 503 requests
+  if (backendOnline === false) {
+    return getLocalProducts();
+  }
+
+  try {
+    const params = new URLSearchParams();
+    if (category && category !== 'all') params.append('category', category);
+    if (search) params.append('search', search);
+
+    const url = `${API_BASE}/products${params.toString() ? `?${params.toString()}` : ''}`;
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) {
+      backendOnline = false;
+      return getLocalProducts();
+    }
+    const data = await res.json();
+    backendOnline = true;
+    return { data: data.filter(p => !deletedIds.includes(p.id)), source: 'backend' };
+  } catch (err) {
+    backendOnline = false;
+    return getLocalProducts();
   }
 };
 
 export const fetchCategories = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/categories`);
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    const data = await res.json();
-    return { data, source: 'backend' };
-  } catch (err) {
+  if (backendOnline === false) {
     return { data: CATEGORIES, source: 'local' };
   }
-};
 
-export const checkBackendHealth = async () => {
   try {
-    const res = await fetch(`${API_BASE}/health`);
-    if (!res.ok) return false;
+    const res = await fetch(`${API_BASE}/categories`);
+    if (!res.ok) {
+      backendOnline = false;
+      return { data: CATEGORIES, source: 'local' };
+    }
     const data = await res.json();
-    return data.status === 'UP';
-  } catch (e) {
-    return false;
+    backendOnline = true;
+    return { data, source: 'backend' };
+  } catch (err) {
+    backendOnline = false;
+    return { data: CATEGORIES, source: 'local' };
   }
 };
 
@@ -78,16 +134,28 @@ export const createProduct = async (productData) => {
   const updatedList = [productData, ...custom.filter(p => p.id !== productData.id)];
   saveCustomProducts(updatedList);
 
+  // Unmark if previously deleted
+  const deleted = getDeletedProductIds().filter(delId => delId !== productData.id);
+  localStorage.setItem('lakaram_deleted_products', JSON.stringify(deleted));
+
+  if (backendOnline === false) {
+    return productData;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/products`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(productData)
     });
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    if (!res.ok) {
+      backendOnline = false;
+      return productData;
+    }
+    backendOnline = true;
     return await res.json();
   } catch (err) {
-    console.info('Backend unreachable, product saved to browser storage:', err.message);
+    backendOnline = false;
     return productData;
   }
 };
@@ -102,39 +170,75 @@ export const updateProduct = async (id, productData) => {
   }
   saveCustomProducts(custom);
 
+  if (backendOnline === false) {
+    return productData;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/products/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(productData)
     });
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    if (!res.ok) {
+      backendOnline = false;
+      return productData;
+    }
+    backendOnline = true;
     return await res.json();
   } catch (err) {
+    backendOnline = false;
     return productData;
   }
 };
 
 export const deleteProduct = async (id) => {
+  // 1. Permanently remember deleted product so it vanishes immediately and never returns
+  saveDeletedProductId(id);
   const custom = getStoredCustomProducts().filter(p => p.id !== id);
   saveCustomProducts(custom);
+
+  // 2. If backend is offline, finish immediately without triggering 503 console errors
+  if (backendOnline === false) {
+    return true;
+  }
 
   try {
     const res = await fetch(`${API_BASE}/products/${id}`, {
       method: 'DELETE'
     });
+    if (!res.ok) {
+      backendOnline = false;
+    }
     return res.ok;
   } catch (err) {
+    backendOnline = false;
     return true;
   }
 };
 
 export const fetchOrders = async () => {
+  if (backendOnline === false) {
+    try {
+      const saved = localStorage.getItem('sparklefest_orders_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  }
+
   try {
     const res = await fetch(`${API_BASE}/orders`);
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    return await res.json();
+    if (!res.ok) {
+      backendOnline = false;
+      const saved = localStorage.getItem('sparklefest_orders_history');
+      return saved ? JSON.parse(saved) : [];
+    }
+    const data = await res.json();
+    backendOnline = true;
+    return data;
   } catch (err) {
+    backendOnline = false;
     try {
       const saved = localStorage.getItem('sparklefest_orders_history');
       return saved ? JSON.parse(saved) : [];
