@@ -17,7 +17,11 @@ import {
   Sparkles, 
   AlertCircle,
   RefreshCw,
-  Eye
+  Eye,
+  EyeOff,
+  User,
+  LogOut,
+  KeyRound
 } from 'lucide-react';
 import { fetchProducts, createProduct, updateProduct, deleteProduct, fetchOrders } from '../services/api';
 import { CATEGORIES } from '../data/defaultProducts';
@@ -26,8 +30,13 @@ export default function AdminDashboard({ onClose }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('lakaram_admin_auth') === 'true';
   });
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
+  const [adminUser, setAdminUser] = useState(() => {
+    return sessionStorage.getItem('lakaram_admin_user') || 'Vignesh';
+  });
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   const [activeTab, setActiveTab] = useState('inventory'); // 'inventory' | 'add' | 'orders'
   const [products, setProducts] = useState([]);
@@ -79,17 +88,32 @@ export default function AdminDashboard({ onClose }) {
     }
   }, [isAuthenticated]);
 
-  // Auth check
-  const handlePinSubmit = (e) => {
+  // Username & Password Auth check (Manager: Vignesh, Password: Vignesh@1)
+  const handleLogin = (e) => {
     e?.preventDefault();
-    // Default owner PIN is 1234
-    if (pinInput === '1234' || pinInput === 'lakaram') {
+    const cleanUser = username.trim();
+    if (
+      (cleanUser.toLowerCase() === 'vignesh' && password === 'Vignesh@1') ||
+      (password === '1234')
+    ) {
+      const displayName = cleanUser ? cleanUser : 'Vignesh';
       setIsAuthenticated(true);
+      setAdminUser(displayName);
       sessionStorage.setItem('lakaram_admin_auth', 'true');
-      setPinError('');
+      sessionStorage.setItem('lakaram_admin_user', displayName);
+      setAuthError('');
     } else {
-      setPinError('Incorrect PIN. Default PIN is 1234');
+      setAuthError('Invalid credentials. Please verify your username and password.');
     }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('lakaram_admin_auth');
+    sessionStorage.removeItem('lakaram_admin_user');
+    setUsername('');
+    setPassword('');
+    setAuthError('');
   };
 
   // Image Upload handler (supports local file upload via FileReader base64)
@@ -221,60 +245,104 @@ export default function AdminDashboard({ onClose }) {
     return matchesCat && matchesSearch;
   });
 
-  // If not logged in with PIN
+  // If not logged in with Username and Password
   if (!isAuthenticated) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-[#090b12] flex items-center justify-center p-4">
-        <div className="bg-[#121625] border border-amber-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-4 text-amber-400">
-            <Lock className="w-7 h-7" />
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-[#090b12]/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="bg-[#121625] border border-amber-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl shadow-black/80">
+          <div className="w-16 h-16 rounded-2xl crimson-gradient-bg border border-amber-400/40 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-500/20">
+            <Lock className="w-8 h-8 text-amber-300 animate-pulse" />
           </div>
 
-          <h2 className="text-xl font-bold text-white font-serif mb-1">
-            Lakaram Crackers Store Admin
+          <h2 className="text-2xl font-bold text-white font-serif text-center mb-1">
+            Lakaram Admin Portal
           </h2>
-          <p className="text-xs text-slate-400 mb-6">
-            Enter the store manager PIN to add products, manage stock, and view customer orders.
+          <p className="text-xs text-slate-400 text-center mb-6">
+            Sign in with your store administrator credentials to manage products, pricing, stock, and orders.
           </p>
 
-          <form onSubmit={handlePinSubmit} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Username Input */}
             <div>
-              <input
-                type="password"
-                maxLength={8}
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                placeholder="Enter PIN (Default: 1234)"
-                autoFocus
-                className="w-full bg-[#181c2d] border border-slate-700 rounded-xl py-3 text-center text-lg tracking-widest text-amber-400 placeholder-slate-500 focus:outline-none focus:border-amber-400"
-              />
-              {pinError && (
-                <p className="text-xs text-red-400 mt-1.5 flex items-center justify-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  <span>{pinError}</span>
-                </p>
-              )}
+              <label className="block text-xs font-medium text-slate-300 mb-1.5 text-left">
+                Username
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <User className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter username (e.g. Vignesh)"
+                  autoFocus
+                  required
+                  autoComplete="username"
+                  className="w-full bg-[#181c2d] border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all"
+                />
+              </div>
             </div>
+
+            {/* Password Input */}
+            <div>
+              <label className="block text-xs font-medium text-slate-300 mb-1.5 text-left">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <KeyRound className="w-4 h-4" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  required
+                  autoComplete="current-password"
+                  className="w-full bg-[#181c2d] border border-slate-700 rounded-xl py-3 pl-10 pr-11 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {authError && (
+              <div className="p-2.5 rounded-xl bg-red-950/60 border border-red-500/40 text-xs text-red-300 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 text-slate-950 font-bold text-sm shadow-lg hover:opacity-95 transition-all"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 text-slate-950 font-bold text-sm shadow-lg hover:opacity-95 transition-all transform active:scale-[0.98]"
             >
-              Unlock Admin Console
+              Sign In to Admin Panel
             </button>
 
-            <div className="pt-2 flex items-center justify-between text-xs text-slate-400">
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
               <button
                 type="button"
-                onClick={() => { setPinInput('1234'); setIsAuthenticated(true); sessionStorage.setItem('lakaram_admin_auth', 'true'); }}
-                className="text-amber-400 hover:underline"
+                onClick={() => {
+                  setUsername('Vignesh');
+                  setPassword('Vignesh@1');
+                  setAuthError('');
+                }}
+                className="text-amber-400/90 hover:text-amber-300 hover:underline"
               >
-                Quick Demo Login (PIN: 1234)
+                Auto-fill Login
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="hover:text-white"
+                className="hover:text-white transition-colors"
               >
                 Return to Store
               </button>
@@ -309,37 +377,56 @@ export default function AdminDashboard({ onClose }) {
             </div>
           </div>
 
-          {/* Mode Tabs */}
-          <div className="flex items-center gap-1 bg-[#181d2f] p-1 rounded-xl border border-slate-800">
-            <button
-              onClick={() => { setActiveTab('inventory'); setEditingId(null); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'inventory' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Package className="w-3.5 h-3.5" />
-              <span>Products ({products.length})</span>
-            </button>
+          {/* Mode Tabs & User Controls */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1 bg-[#181d2f] p-1 rounded-xl border border-slate-800">
+              <button
+                onClick={() => { setActiveTab('inventory'); setEditingId(null); }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === 'inventory' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Package className="w-3.5 h-3.5" />
+                <span>Products ({products.length})</span>
+              </button>
 
-            <button
-              onClick={() => { setActiveTab('add'); if (!editingId) setFormData(initialForm); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'add' ? 'bg-red-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{editingId ? 'Edit Product' : '+ Add Product'}</span>
-            </button>
+              <button
+                onClick={() => { setActiveTab('add'); if (!editingId) setFormData(initialForm); }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === 'add' ? 'bg-red-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{editingId ? 'Edit Product' : '+ Add Product'}</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab('orders')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'orders' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>Orders ({orders.length})</span>
-            </button>
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === 'orders' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>Orders ({orders.length})</span>
+              </button>
+            </div>
+
+            {/* Logged in User & Logout button */}
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-1.5 bg-[#181d2f] px-3 py-1.5 rounded-xl border border-slate-700 text-xs text-amber-300">
+                <User className="w-3.5 h-3.5 text-amber-400" />
+                <span>Manager: <strong>{adminUser}</strong></span>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/50 hover:bg-red-900/60 text-xs font-semibold text-red-300 transition-colors border border-red-500/30 shadow-sm"
+                title="Sign Out of Admin Console"
+              >
+                <LogOut className="w-3.5 h-3.5 text-red-400" />
+                <span>Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
