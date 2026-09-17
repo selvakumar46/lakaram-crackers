@@ -36,7 +36,6 @@ export default function CartDrawer() {
 
   if (!isCartOpen) return null;
 
-  const minOrderProgress = Math.min(100, (subtotal / minOrderThreshold) * 100);
   const freeGiftProgress = Math.min(100, (subtotal / freeGiftThreshold) * 100);
 
   return (
@@ -67,51 +66,24 @@ export default function CartDrawer() {
             </button>
           </div>
 
-          {/* Festive Reward Progress Bars */}
-          <div className="p-3.5 bg-[#121522] border-b border-slate-800 space-y-2.5 text-xs">
-            {/* Minimum Order */}
-            <div>
-              <div className="flex justify-between text-[11px] mb-1">
-                <span className="text-slate-400">
-                  {subtotal >= minOrderThreshold ? (
-                    <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5" /> Minimum dispatch order reached!
-                    </span>
-                  ) : (
-                    <span>Add ₹{(minOrderThreshold - subtotal).toFixed(0)} more for min dispatch</span>
-                  )}
-                </span>
-                <span className="font-bold text-slate-300">₹{subtotal.toFixed(0)} / ₹{minOrderThreshold}</span>
-              </div>
-              <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                <div 
-                  className={`h-full transition-all duration-500 rounded-full ${
-                    subtotal >= minOrderThreshold ? 'bg-emerald-500' : 'bg-amber-500'
-                  }`}
-                  style={{ width: `${minOrderProgress}%` }}
-                />
-              </div>
+          {/* Festive Reward Progress Bar */}
+          <div className="p-3.5 bg-[#121522] border-b border-slate-800 text-xs">
+            <div className="flex justify-between text-[11px] mb-1">
+              <span className="text-slate-400 flex items-center gap-1">
+                <Gift className="w-3.5 h-3.5 text-amber-400" />
+                {isFreePackingMet ? (
+                  <span className="text-amber-300 font-bold">Free Packing & Sparkler Gift Unlocked! 🎉</span>
+                ) : (
+                  <span>Add ₹{(freeGiftThreshold - subtotal).toFixed(0)} more for Free Gift & Packing</span>
+                )}
+              </span>
+              <span className="font-bold text-slate-300">₹{subtotal.toFixed(0)} / ₹{freeGiftThreshold}</span>
             </div>
-
-            {/* Free Gift & Free Packing */}
-            <div>
-              <div className="flex justify-between text-[11px] mb-1">
-                <span className="text-slate-400 flex items-center gap-1">
-                  <Gift className="w-3.5 h-3.5 text-amber-400" />
-                  {isFreePackingMet ? (
-                    <span className="text-amber-300 font-bold">Free Packing & Sparkler Gift Unlocked! 🎉</span>
-                  ) : (
-                    <span>Add ₹{(freeGiftThreshold - subtotal).toFixed(0)} more for Free Gift & Packing</span>
-                  )}
-                </span>
-                <span className="font-bold text-slate-300">₹{subtotal.toFixed(0)} / ₹{freeGiftThreshold}</span>
-              </div>
-              <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-red-500 to-amber-400 transition-all duration-500 rounded-full"
-                  style={{ width: `${freeGiftProgress}%` }}
-                />
-              </div>
+            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-red-500 to-amber-400 transition-all duration-500 rounded-full"
+                style={{ width: `${freeGiftProgress}%` }}
+              />
             </div>
           </div>
 
@@ -219,28 +191,20 @@ export default function CartDrawer() {
                 </div>
               </div>
 
-              {/* Warning if min order not met */}
-              {!isMinOrderMet && (
-                <div className="p-2.5 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-[11px] flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-400" />
-                  <span>Minimum order amount for transport dispatch is ₹{minOrderThreshold}. Please add ₹{(minOrderThreshold - subtotal).toFixed(0)} more.</span>
-                </div>
-              )}
-
               {/* Action Buttons */}
               <button
                 onClick={() => {
-                  if (!isMinOrderMet) {
-                    alert(`Minimum order is ₹${minOrderThreshold} for direct transport dispatch.`);
+                  if (totalItemCount === 0) {
+                    alert('Please add at least 1 item to proceed to checkout.');
                     return;
                   }
                   setIsCartOpen(false);
                   setIsCheckoutOpen(true);
                 }}
-                disabled={!isMinOrderMet}
+                disabled={totalItemCount === 0}
                 className={`w-full py-3 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg transition-all ${
-                  isMinOrderMet
-                    ? 'bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 hover:opacity-95 text-slate-950'
+                  totalItemCount > 0
+                    ? 'bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 hover:opacity-95 text-slate-950 shadow-amber-500/20 active:scale-95'
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                 }`}
               >

@@ -121,9 +121,9 @@ export const CartProvider = ({ children }) => {
   );
 
   const festiveSavings = Math.max(0, actualTotal - subtotal);
-  const minOrderThreshold = 1000;
+  const minOrderThreshold = 1; // Acceptable order amount is ₹1 and above
   const freeGiftThreshold = 3000;
-  const isMinOrderMet = subtotal >= minOrderThreshold || subtotal === 0;
+  const isMinOrderMet = subtotal >= 1 || subtotal === 0;
   const isFreePackingMet = subtotal >= 3000;
   const packingCharges = subtotal > 0 && !isFreePackingMet ? 150 : 0;
   const grandTotal = subtotal + packingCharges;
