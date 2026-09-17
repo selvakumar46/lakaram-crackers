@@ -65,7 +65,59 @@ app.get('/api/health', async (req, res) => {
 });
 
 // ==========================================
-// 2. PRODUCTS ENDPOINTS (GET, POST, PUT, DELETE)
+// 2. CATEGORIES ENDPOINT (Live database counts)
+// ==========================================
+const BASE_CATEGORIES = [
+  { id: 'all', name: 'All Products', icon: 'Sparkles' },
+  { id: 'sparklers', name: 'Sparklers', icon: 'Sparkles', description: 'Classic festive hand sparklers with vivid colors' },
+  { id: 'chakkars', name: 'Ground Chakkars', icon: 'RotateCw', description: 'High-speed spinning ground wheels' },
+  { id: 'flower-pots', name: 'Flower Pots', icon: 'Flame', description: 'Vibrant conical fountains throwing glittering sprays' },
+  { id: 'rockets', name: 'Rockets & Missiles', icon: 'Rocket', description: 'Sky-bound whistle rockets with colorful burst' },
+  { id: 'aerial-shots', name: 'Multi Sky Shots', icon: 'Sun', description: 'Spectacular multi-burst night sky repeaters' },
+  { id: 'sound-crackers', name: 'Sound Crackers & Bijili', icon: 'Zap', description: 'Traditional rhythmic sound strips & garlands' },
+  { id: 'atom-bombs', name: 'Atom Bombs', icon: 'Bomb', description: 'Heavy concussion bass crackers' },
+  { id: 'gift-boxes', name: 'Gift Boxes & Combos', icon: 'Package', description: 'Curated festive family hampers' },
+  { id: 'kids-special', name: 'Kids Safe Crackers', icon: 'Smile', description: 'Safe, low-smoke, pop-pops & novelties' },
+  { id: 'garlands', name: 'Garlands & Walas', icon: 'Zap', description: 'Traditional multi-shot crackers and garlands' }
+];
+
+app.get('/api/categories', async (req, res) => {
+  try {
+    const countRes = await pool.query('SELECT category, COUNT(*)::int AS count FROM products GROUP BY category');
+    const countMap = {};
+    countRes.rows.forEach(r => {
+      countMap[r.category] = r.count;
+    });
+
+    const totalRes = await pool.query('SELECT COUNT(*)::int AS total FROM products');
+    const totalCount = totalRes.rows[0]?.total || 0;
+
+    const result = BASE_CATEGORIES.map(cat => ({
+      ...cat,
+      itemCount: cat.id === 'all' ? totalCount : (countMap[cat.id] || 0)
+    }));
+
+    // Include any custom categories in DB not in BASE_CATEGORIES
+    countRes.rows.forEach(r => {
+      if (!result.some(c => c.id === r.category)) {
+        result.push({
+          id: r.category,
+          name: r.category.charAt(0).toUpperCase() + r.category.slice(1).replace('-', ' '),
+          icon: 'Sparkles',
+          itemCount: r.count
+        });
+      }
+    });
+
+    res.json(result);
+  } catch (err) {
+    console.error('Error in GET /api/categories:', err);
+    res.status(500).json({ error: 'Failed to fetch categories from database' });
+  }
+});
+
+// ==========================================
+// 3. PRODUCTS ENDPOINTS (GET, POST, PUT, DELETE)
 // ==========================================
 
 // GET all products (with optional search and category filter)

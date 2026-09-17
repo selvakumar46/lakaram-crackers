@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import { fetchProducts } from '../services/api';
 
 export default function ProductGrid() {
-  const { selectedCategory, searchQuery, setSearchQuery } = useCart();
+  const { selectedCategory, searchQuery, setSearchQuery, catalogProducts } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('featured');
@@ -17,7 +17,7 @@ export default function ProductGrid() {
         setProducts(res.data);
       })
       .finally(() => setLoading(false));
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, catalogProducts]);
 
   // Sort logic
   const sortedProducts = [...products].sort((a, b) => {

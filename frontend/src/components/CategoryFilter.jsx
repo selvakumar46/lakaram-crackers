@@ -28,14 +28,26 @@ const ICON_MAP = {
 };
 
 export default function CategoryFilter() {
-  const { selectedCategory, setSelectedCategory } = useCart();
+  const { selectedCategory, setSelectedCategory, catalogProducts, categories: dynamicCategories } = useCart();
+
+  const displayCategories = (dynamicCategories && dynamicCategories.length > 0) ? dynamicCategories : CATEGORIES;
 
   return (
     <div className="w-full bg-[#111422] border-b border-slate-800/80 py-3 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-        {CATEGORIES.map(cat => {
+        {displayCategories.map(cat => {
           const IconComponent = ICON_MAP[cat.icon] || Sparkles;
           const isSelected = selectedCategory === cat.id;
+
+          // Count strictly from the actual records loaded from the DB
+          let count = 0;
+          if (catalogProducts && catalogProducts.length > 0) {
+            count = cat.id === 'all' 
+              ? catalogProducts.length 
+              : catalogProducts.filter(p => p.category === cat.id).length;
+          } else if (cat.itemCount !== undefined) {
+            count = cat.itemCount;
+          }
 
           return (
             <button
@@ -49,13 +61,11 @@ export default function CategoryFilter() {
             >
               <IconComponent className={`w-3.5 h-3.5 ${isSelected ? 'text-slate-950' : 'text-amber-400'}`} />
               <span>{cat.name}</span>
-              {cat.itemCount && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  isSelected ? 'bg-black/20 text-slate-900' : 'bg-slate-800 text-slate-400'
-                }`}>
-                  {cat.itemCount}
-                </span>
-              )}
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                isSelected ? 'bg-black/20 text-slate-900' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {count}
+              </span>
             </button>
           );
         })}

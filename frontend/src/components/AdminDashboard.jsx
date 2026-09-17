@@ -25,8 +25,10 @@ import {
 } from 'lucide-react';
 import { fetchProducts, createProduct, updateProduct, deleteProduct, fetchOrders } from '../services/api';
 import { CATEGORIES } from '../data/defaultProducts';
+import { useCart } from '../context/CartContext';
 
 export default function AdminDashboard({ onClose }) {
+  const { refreshCatalog } = useCart();
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('lakaram_admin_auth') === 'true';
   });
@@ -196,6 +198,7 @@ export default function AdminDashboard({ onClose }) {
     }
 
     await loadData();
+    if (refreshCatalog) refreshCatalog();
     setTimeout(() => {
       setFormSuccess('');
       setEditingId(null);
@@ -233,7 +236,8 @@ export default function AdminDashboard({ onClose }) {
     if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
       setProducts(prev => prev.filter(p => p.id !== id));
       await deleteProduct(id);
-      loadData();
+      await loadData();
+      if (refreshCatalog) refreshCatalog();
     }
   };
 

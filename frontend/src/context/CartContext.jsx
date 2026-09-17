@@ -1,8 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchProducts, fetchCategories } from '../services/api';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
+  const [catalogProducts, setCatalogProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  const refreshCatalog = async () => {
+    try {
+      const [prodRes, catRes] = await Promise.all([
+        fetchProducts(),
+        fetchCategories()
+      ]);
+      if (prodRes && prodRes.data) {
+        setCatalogProducts(prodRes.data);
+      }
+      if (catRes && catRes.data) {
+        setCategories(catRes.data);
+      }
+    } catch (e) {
+      console.error('Failed to load live catalog:', e);
+    }
+  };
+
+  useEffect(() => {
+    refreshCatalog();
+  }, []);
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('sparklefest_cart');
@@ -163,7 +187,12 @@ export const CartProvider = ({ children }) => {
       isAdminOpen,
       setIsAdminOpen,
       completedOrder,
-      setCompletedOrder
+      setCompletedOrder,
+      catalogProducts,
+      setCatalogProducts,
+      categories,
+      setCategories,
+      refreshCatalog
     }}>
       {children}
     </CartContext.Provider>
