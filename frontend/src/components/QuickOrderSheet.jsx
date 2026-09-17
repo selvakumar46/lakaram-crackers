@@ -28,16 +28,26 @@ export default function QuickOrderSheet() {
     setIsCartOpen,
     setIsCheckoutOpen,
     isMinOrderMet,
-    minOrderThreshold
+    minOrderThreshold,
+    catalogProducts,
+    categories: dynamicCategories
   } = useCart();
 
-  const [allProducts, setAllProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState(catalogProducts || []);
   const [sheetSearch, setSheetSearch] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState('all');
 
   useEffect(() => {
-    fetchProducts().then(res => setAllProducts(res.data));
-  }, []);
+    if (catalogProducts && catalogProducts.length > 0) {
+      setAllProducts(catalogProducts);
+    } else {
+      fetchProducts().then(res => {
+        if (res && res.data) setAllProducts(res.data);
+      });
+    }
+  }, [catalogProducts]);
+
+  const displayCategories = (dynamicCategories && dynamicCategories.length > 0) ? dynamicCategories : CATEGORIES;
 
   // Filter products by tab and sheetSearch
   const filteredProducts = allProducts.filter(p => {
@@ -57,7 +67,7 @@ export default function QuickOrderSheet() {
   }, {});
 
   const getCategoryTitle = (catId) => {
-    const found = CATEGORIES.find(c => c.id === catId);
+    const found = displayCategories.find(c => c.id === catId);
     return found ? found.name : catId.toUpperCase();
   };
 
@@ -114,27 +124,40 @@ export default function QuickOrderSheet() {
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1">
             <button
               onClick={() => setActiveCategoryTab('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 activeCategoryTab === 'all'
                   ? 'bg-amber-500 text-slate-950'
                   : 'bg-[#0d101a] text-slate-400 hover:text-white'
               }`}
             >
-              All Categories
+              <span>All Categories</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                activeCategoryTab === 'all' ? 'bg-black/20 text-slate-900' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {allProducts.length}
+              </span>
             </button>
-            {CATEGORIES.filter(c => c.id !== 'all').map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategoryTab(cat.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                  activeCategoryTab === cat.id
-                    ? 'bg-amber-500 text-slate-950'
-                    : 'bg-[#0d101a] text-slate-400 hover:text-white'
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
+            {displayCategories.filter(c => c.id !== 'all').map(cat => {
+              const catCount = allProducts.filter(p => p.category === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategoryTab(cat.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                    activeCategoryTab === cat.id
+                      ? 'bg-amber-500 text-slate-950'
+                      : 'bg-[#0d101a] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>{cat.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    activeCategoryTab === cat.id ? 'bg-black/20 text-slate-900' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {catCount}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

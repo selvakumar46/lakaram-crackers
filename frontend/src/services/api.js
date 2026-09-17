@@ -1,9 +1,6 @@
-import { DEFAULT_PRODUCTS, CATEGORIES } from '../data/defaultProducts';
+﻿import { DEFAULT_PRODUCTS, CATEGORIES } from '../data/defaultProducts';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
-
-// Track backend reachability in memory to avoid generating red 503 errors in console
-let backendOnline = null; // null: unknown, true: online, false: offline
 
 const getStoredCustomProducts = () => {
   try {
@@ -22,51 +19,22 @@ const saveCustomProducts = (list) => {
   }
 };
 
-// Permanent deleted products list so deleted items never re-appear
-const getDeletedProductIds = () => {
-  try {
-    const saved = localStorage.getItem('lakaram_deleted_products');
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveDeletedProductId = (id) => {
-  try {
-    const list = getDeletedProductIds();
-    if (!list.includes(id)) {
-      list.push(id);
-      localStorage.setItem('lakaram_deleted_products', JSON.stringify(list));
-    }
-  } catch (e) {
-    console.error(e);
-  }
-};
-
 export const checkBackendHealth = async () => {
   try {
     const res = await fetch(`${API_BASE}/health`);
-    if (!res.ok) {
-      backendOnline = false;
-      return false;
-    }
+    if (!res.ok) return false;
     const data = await res.json();
-    backendOnline = (data.status === 'UP');
-    return backendOnline;
+    return data.status === 'UP';
   } catch (e) {
-    backendOnline = false;
     return false;
   }
 };
 
 export const fetchProducts = async (category = null, search = null) => {
-  const deletedIds = getDeletedProductIds();
-
-  // Helper for filtering local products
+  // Helper for filtering local fallback products if offline
   const getLocalProducts = () => {
-    const custom = getStoredCustomProducts().filter(p => !deletedIds.includes(p.id));
-    let all = [...custom, ...DEFAULT_PRODUCTS.filter(dp => !custom.some(c => c.id === dp.id) && !deletedIds.includes(dp.id))];
+    const custom = getStoredCustomProducts();
+    let all = [...custom, ...DEFAULT_PRODUCTS.filter(dp => !custom.some(c => c.id === dp.id))];
 
     if (category && category !== 'all') {
       all = all.filter(p => p.category === category);
@@ -83,60 +51,42 @@ export const fetchProducts = async (category = null, search = null) => {
     return { data: all, source: 'local' };
   };
 
-  // If backend is already detected offline, serve from local cache without spamming 503 requests
-  if (backendOnline === false) {
-    return getLocalProducts();
-  }
-
   try {
     const params = new URLSearchParams();
     if (category && category !== 'all') params.append('category', category);
-    if (search) params.append('search', search);
+    if (search && search.trim()) params.append('search', search.trim());
 
     const url = `${API_BASE}/products${params.toString() ? `?${params.toString()}` : ''}`;
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) {
-      backendOnline = false;
+      console.warn(`[API] Products endpoint returned ${res.status}, using local fallback`);
       return getLocalProducts();
     }
     const data = await res.json();
-    backendOnline = true;
-    return { data: data.filter(p => !deletedIds.includes(p.id)), source: 'backend' };
+    return { data, source: 'backend' };
   } catch (err) {
-    backendOnline = false;
+    console.warn('[API] Could not fetch live products from DB, using local fallback:', err.message);
     return getLocalProducts();
   }
 };
 
 export const fetchCategories = async () => {
-  if (backendOnline === false) {
-    return { data: CATEGORIES, source: 'local' };
-  }
-
   try {
     const res = await fetch(`${API_BASE}/categories`);
-    if (!res.ok) {
-      backendOnline = false;
-      return { data: CATEGORIES, source: 'local' };
-    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    backendOnline = true;
     return { data, source: 'backend' };
   } catch (err) {
-    backendOnline = false;
+    console.warn('[API] Could not fetch categories from DB:', err.message);
     return { data: CATEGORIES, source: 'local' };
   }
 };
 
 export const createProduct = async (productData) => {
-  // Always persist to local custom products list for standalone resilience
+  // Save locally for offline resiliency
   const custom = getStoredCustomProducts();
   const updatedList = [productData, ...custom.filter(p => p.id !== productData.id)];
   saveCustomProducts(updatedList);
-
-  // Unmark if previously deleted
-  const deleted = getDeletedProductIds().filter(delId => delId !== productData.id);
-  localStorage.setItem('lakaram_deleted_products', JSON.stringify(deleted));
 
   try {
     const res = await fetch(`${API_BASE}/products`, {
@@ -144,7 +94,10 @@ export const createProduct = async (productData) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(productData)
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errText}`);
+    }
     const data = await res.json();
     console.log(`[Database] Created product ${data.id} in Neon PostgreSQL`);
     return data;
@@ -181,48 +134,35 @@ export const updateProduct = async (id, productData) => {
 };
 
 export const deleteProduct = async (id) => {
-  // 1. Permanently remember deleted product in local storage
-  saveDeletedProductId(id);
+  // Remove from local custom products cache
   const custom = getStoredCustomProducts().filter(p => p.id !== id);
   saveCustomProducts(custom);
 
-  // 2. Delete directly from Neon PostgreSQL database
+  // Delete directly from Neon PostgreSQL database
   try {
     const res = await fetch(`${API_BASE}/products/${id}`, {
       method: 'DELETE'
     });
     if (res.ok) {
       console.log(`[Database] Deleted product ${id} from Neon PostgreSQL`);
+      return true;
+    } else {
+      console.warn(`[Database] Delete returned HTTP ${res.status}`);
+      return false;
     }
-    return res.ok;
   } catch (err) {
     console.warn('[Database] Deleted locally, sync deferred:', err.message);
-    return true;
+    return false;
   }
 };
 
 export const fetchOrders = async () => {
-  if (backendOnline === false) {
-    try {
-      const saved = localStorage.getItem('sparklefest_orders_history');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  }
-
   try {
     const res = await fetch(`${API_BASE}/orders`);
-    if (!res.ok) {
-      backendOnline = false;
-      const saved = localStorage.getItem('sparklefest_orders_history');
-      return saved ? JSON.parse(saved) : [];
-    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    backendOnline = true;
     return data;
   } catch (err) {
-    backendOnline = false;
     try {
       const saved = localStorage.getItem('sparklefest_orders_history');
       return saved ? JSON.parse(saved) : [];
