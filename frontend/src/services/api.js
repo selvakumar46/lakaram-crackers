@@ -138,24 +138,18 @@ export const createProduct = async (productData) => {
   const deleted = getDeletedProductIds().filter(delId => delId !== productData.id);
   localStorage.setItem('lakaram_deleted_products', JSON.stringify(deleted));
 
-  if (backendOnline === false) {
-    return productData;
-  }
-
   try {
     const res = await fetch(`${API_BASE}/products`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(productData)
     });
-    if (!res.ok) {
-      backendOnline = false;
-      return productData;
-    }
-    backendOnline = true;
-    return await res.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    console.log(`[Database] Created product ${data.id} in Neon PostgreSQL`);
+    return data;
   } catch (err) {
-    backendOnline = false;
+    console.warn('[Database] Saved to local storage, sync deferred:', err.message);
     return productData;
   }
 };
@@ -170,49 +164,39 @@ export const updateProduct = async (id, productData) => {
   }
   saveCustomProducts(custom);
 
-  if (backendOnline === false) {
-    return productData;
-  }
-
   try {
     const res = await fetch(`${API_BASE}/products/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(productData)
     });
-    if (!res.ok) {
-      backendOnline = false;
-      return productData;
-    }
-    backendOnline = true;
-    return await res.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    console.log(`[Database] Updated product ${id} in Neon PostgreSQL`);
+    return data;
   } catch (err) {
-    backendOnline = false;
+    console.warn('[Database] Updated locally, sync deferred:', err.message);
     return productData;
   }
 };
 
 export const deleteProduct = async (id) => {
-  // 1. Permanently remember deleted product so it vanishes immediately and never returns
+  // 1. Permanently remember deleted product in local storage
   saveDeletedProductId(id);
   const custom = getStoredCustomProducts().filter(p => p.id !== id);
   saveCustomProducts(custom);
 
-  // 2. If backend is offline, finish immediately without triggering 503 console errors
-  if (backendOnline === false) {
-    return true;
-  }
-
+  // 2. Delete directly from Neon PostgreSQL database
   try {
     const res = await fetch(`${API_BASE}/products/${id}`, {
       method: 'DELETE'
     });
-    if (!res.ok) {
-      backendOnline = false;
+    if (res.ok) {
+      console.log(`[Database] Deleted product ${id} from Neon PostgreSQL`);
     }
     return res.ok;
   } catch (err) {
-    backendOnline = false;
+    console.warn('[Database] Deleted locally, sync deferred:', err.message);
     return true;
   }
 };
