@@ -1,6 +1,6 @@
 import { DEFAULT_PRODUCTS, CATEGORIES } from '../data/defaultProducts';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const getStoredCustomProducts = () => {
   try {
