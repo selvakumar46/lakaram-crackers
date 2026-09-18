@@ -359,7 +359,7 @@ apiApp.post('/api/orders', async (req, res) => {
 
     const actualValue = subtotal * 5; // 80% savings
     const festiveDiscount = actualValue - subtotal;
-    const packingCharges = subtotal > 3000 ? 0 : 150;
+    const packingCharges = 150;
     const grandTotal = subtotal + packingCharges;
 
     // Build WhatsApp message URL

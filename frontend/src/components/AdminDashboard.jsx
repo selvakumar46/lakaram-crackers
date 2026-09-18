@@ -1470,9 +1470,7 @@ export default function AdminDashboard({ onClose }) {
                   <div className="flex justify-between text-slate-400 print:text-gray-600">
                     <span>Packing & Transport Forwarding:</span>
                     <span>
-                      {selectedOrderForInvoice.packingAndForwarding === 0 || selectedOrderForInvoice.subtotal > 3000
-                        ? 'FREE'
-                        : `₹${(selectedOrderForInvoice.packingAndForwarding || 150).toFixed(2)}`}
+                      ₹{(selectedOrderForInvoice.packingAndForwarding || 150).toFixed(2)}
                     </span>
                   </div>
                   <div className="pt-2.5 border-t border-slate-700 flex justify-between items-baseline font-black print:border-gray-300">

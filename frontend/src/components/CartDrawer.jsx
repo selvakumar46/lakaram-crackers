@@ -23,9 +23,7 @@ export default function CartDrawer() {
     actualTotal,
     festiveSavings,
     minOrderThreshold,
-    freeGiftThreshold,
     isMinOrderMet,
-    isFreePackingMet,
     packingCharges,
     grandTotal,
     addToCart,
@@ -35,8 +33,6 @@ export default function CartDrawer() {
   } = useCart();
 
   if (!isCartOpen) return null;
-
-  const freeGiftProgress = Math.min(100, (subtotal / freeGiftThreshold) * 100);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -64,27 +60,6 @@ export default function CartDrawer() {
             >
               <X className="w-5 h-5" />
             </button>
-          </div>
-
-          {/* Festive Reward Progress Bar */}
-          <div className="p-3.5 bg-[#121522] border-b border-slate-800 text-xs">
-            <div className="flex justify-between text-[11px] mb-1">
-              <span className="text-slate-400 flex items-center gap-1">
-                <Gift className="w-3.5 h-3.5 text-amber-400" />
-                {isFreePackingMet ? (
-                  <span className="text-amber-300 font-bold">Free Packing & Sparkler Gift Unlocked! 🎉</span>
-                ) : (
-                  <span>Add ₹{(freeGiftThreshold - subtotal).toFixed(0)} more for Free Gift & Packing</span>
-                )}
-              </span>
-              <span className="font-bold text-slate-300">₹{subtotal.toFixed(0)} / ₹{freeGiftThreshold}</span>
-            </div>
-            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-red-500 to-amber-400 transition-all duration-500 rounded-full"
-                style={{ width: `${freeGiftProgress}%` }}
-              />
-            </div>
           </div>
 
           {/* Cart Items List */}
@@ -175,13 +150,7 @@ export default function CartDrawer() {
                 </div>
                 <div className="flex justify-between text-slate-400">
                   <span>Packing & Transport:</span>
-                  <span>
-                    {packingCharges === 0 ? (
-                      <span className="text-emerald-400 font-bold">FREE</span>
-                    ) : (
-                      `₹${packingCharges.toFixed(0)}`
-                    )}
-                  </span>
+                  <span className="text-slate-200 font-medium">₹{packingCharges.toFixed(0)}</span>
                 </div>
                 <div className="pt-2 border-t border-slate-800 flex justify-between items-baseline">
                   <span className="text-sm font-bold text-white">Net Total:</span>
