@@ -115,6 +115,16 @@ export default function CheckoutModal() {
       clearCart();
       setIsCheckoutOpen(false);
       setCompletedOrder(result);
+
+      // Automatically open WhatsApp to Admin (+91 9442188990) with the complete invoice!
+      if (result?.whatsappShareUrl) {
+        // Direct automatic window open or location redirect
+        const waWindow = window.open(result.whatsappShareUrl, '_blank');
+        if (!waWindow || waWindow.closed || typeof waWindow.closed === 'undefined') {
+          // If popup blocker blocked the new tab, redirect smoothly
+          window.location.href = result.whatsappShareUrl;
+        }
+      }
     } catch (err) {
       setErrorMsg('Failed to create order. Please check connection.');
     } finally {
@@ -375,16 +385,17 @@ export default function CheckoutModal() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 hover:opacity-95 text-slate-950 font-black text-sm shadow-xl flex items-center justify-center gap-2 transition-all"
+              className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-amber-500 to-emerald-500 hover:opacity-95 text-slate-950 font-black text-sm shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing Order...</span>
+                  <span>Submitting & Sending Invoice...</span>
                 </>
               ) : (
                 <>
-                  <span>Place Order & Generate Invoice</span>
+                  <MessageCircle className="w-4 h-4 text-slate-950 fill-current" />
+                  <span>Confirm Order & Send Invoice to WhatsApp</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
