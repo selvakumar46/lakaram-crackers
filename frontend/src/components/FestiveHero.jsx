@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ShieldCheck, Truck, Gift, FileSpreadsheet, PartyPopper } from 'lucide-react';
+import { Sparkles, Truck, FileSpreadsheet, PartyPopper } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
 
@@ -70,7 +70,7 @@ export default function FestiveHero() {
           </div>
 
           {/* Feature Highlights Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto gap-3 sm:gap-4 text-left">
             <div className="festive-glass p-3.5 rounded-xl border border-slate-800/80">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="p-1.5 rounded-lg bg-red-500/10 text-red-400">
@@ -83,32 +83,12 @@ export default function FestiveHero() {
 
             <div className="festive-glass p-3.5 rounded-xl border border-slate-800/80">
               <div className="flex items-center gap-2 mb-1.5">
-                <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <h4 className="text-xs font-bold text-white">CSIR Green Certified</h4>
-              </div>
-              <p className="text-[11px] text-slate-400">30% reduced particulate matter and safe sound levels.</p>
-            </div>
-
-            <div className="festive-glass p-3.5 rounded-xl border border-slate-800/80">
-              <div className="flex items-center gap-2 mb-1.5">
                 <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
                   <Truck className="w-4 h-4" />
                 </div>
                 <h4 className="text-xs font-bold text-white">Safe Express Transport</h4>
               </div>
               <p className="text-[11px] text-slate-400">Doorstep delivery across major states and transport hubs.</p>
-            </div>
-
-            <div className="festive-glass p-3.5 rounded-xl border border-slate-800/80">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400">
-                  <Gift className="w-4 h-4" />
-                </div>
-                <h4 className="text-xs font-bold text-white">Free Gift Combos</h4>
-              </div>
-              <p className="text-[11px] text-slate-400">Bonus sparklers & free packing on orders above ₹3,000.</p>
             </div>
           </div>
         </div>
