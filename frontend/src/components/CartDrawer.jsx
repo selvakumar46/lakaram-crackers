@@ -166,7 +166,7 @@ export default function CartDrawer() {
                   <span className="line-through">₹{actualTotal.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-emerald-400 font-medium">
-                  <span>Festive Discount (75% Off):</span>
+                  <span>Festive Discount (80% Off):</span>
                   <span>- ₹{festiveSavings.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-slate-400">

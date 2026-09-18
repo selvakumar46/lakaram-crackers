@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import pkg from 'pg';
 import cors from 'cors';
 
@@ -29,7 +29,7 @@ const mapProductRow = (row) => ({
   packSize: row.pack_size || '',
   originalPrice: parseFloat(row.original_price) || 0,
   discountedPrice: parseFloat(row.discounted_price) || 0,
-  discountPercent: parseInt(row.discount_percent) || 75,
+  discountPercent: parseInt(row.discount_percent) || 80,
   soundLevel: row.sound_level || 'Low',
   kidSafe: Boolean(row.kid_safe),
   greenCrackerCertified: Boolean(row.green_cracker_certified),
@@ -159,7 +159,7 @@ apiApp.post('/api/products', async (req, res) => {
     const p = req.body;
     const id = p.id || `LKM-${Math.floor(100 + Math.random() * 900)}`;
     const originalPrice = parseFloat(p.originalPrice) || 0;
-    const discountPercent = parseInt(p.discountPercent) || 75;
+    const discountPercent = parseInt(p.discountPercent) || 80;
     const discountedPrice = p.discountedPrice !== undefined 
       ? parseFloat(p.discountedPrice) 
       : Math.round(originalPrice * (100 - discountPercent) / 100);
@@ -222,7 +222,7 @@ apiApp.put('/api/products/:id', async (req, res) => {
     const id = req.params.id;
     const p = req.body;
     const originalPrice = parseFloat(p.originalPrice) || 0;
-    const discountPercent = parseInt(p.discountPercent) || 75;
+    const discountPercent = parseInt(p.discountPercent) || 80;
     const discountedPrice = p.discountedPrice !== undefined 
       ? parseFloat(p.discountedPrice) 
       : Math.round(originalPrice * (100 - discountPercent) / 100);
@@ -357,7 +357,7 @@ apiApp.post('/api/orders', async (req, res) => {
       totalItems += (parseInt(item.quantity) || 1);
     }
 
-    const actualValue = subtotal * 4; // 75% savings
+    const actualValue = subtotal * 5; // 80% savings
     const festiveDiscount = actualValue - subtotal;
     const packingCharges = subtotal > 3000 ? 0 : 150;
     const grandTotal = subtotal + packingCharges;
@@ -379,7 +379,7 @@ apiApp.post('/api/orders', async (req, res) => {
     });
     msg += `--------------------------------------\n`;
     msg += `💰 *Subtotal:* ₹${subtotal.toFixed(0)}\n`;
-    msg += `🎉 *You Saved:* ₹${festiveDiscount.toFixed(0)} (75% Off)\n`;
+    msg += `🎉 *You Saved:* ₹${festiveDiscount.toFixed(0)} (80% Off)\n`;
     msg += `🚚 *Packing & Transport:* ₹${packingCharges}\n`;
     msg += `⭐ *TOTAL PAYABLE:* ₹${grandTotal.toFixed(0)}\n`;
     msg += `--------------------------------------\n`;
@@ -462,4 +462,52 @@ apiApp.post('/api/orders', async (req, res) => {
   }
 });
 
+// Auto-seed or update database with 80% discount
+async function ensureDatabaseInitialized() {
+  try {
+    const countRes = await pool.query('SELECT count(*) FROM products');
+    const count = parseInt(countRes.rows[0].count) || 0;
+    if (count === 0) {
+      console.log('[Neon DB] Products table is empty, seeding catalog with 80% discount...');
+      const { DEFAULT_PRODUCTS } = await import('./src/data/defaultProducts.js');
+      for (const p of DEFAULT_PRODUCTS) {
+        const originalPrice = parseFloat(p.originalPrice) || 0;
+        const discountPercent = 80;
+        const discountedPrice = Math.round(originalPrice * 0.20);
+        await pool.query(`
+          INSERT INTO products (
+            id, name, category, description, pack_size,
+            original_price, discounted_price, discount_percent,
+            sound_level, kid_safe, green_cracker_certified,
+            image, stock, rating, video_demo
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+          ON CONFLICT (id) DO UPDATE SET
+            discount_percent = 80,
+            discounted_price = EXCLUDED.discounted_price
+        `, [
+          p.id, p.name, p.category, p.description, p.packSize,
+          originalPrice, discountedPrice, discountPercent,
+          p.soundLevel, Boolean(p.kidSafe), p.greenCrackerCertified !== false,
+          p.image, p.stock || 100, p.rating || 5, p.videoDemo || ''
+        ]);
+      }
+      console.log(`[Neon DB] Seeding completed: ${DEFAULT_PRODUCTS.length} products inserted with 80% discount.`);
+    } else {
+      const updated = await pool.query(`
+        UPDATE products 
+        SET discount_percent = 80,
+            discounted_price = ROUND(original_price * 0.20)
+        WHERE discount_percent != 80 OR discounted_price != ROUND(original_price * 0.20)
+      `);
+      if (updated.rowCount > 0) {
+        console.log(`[Neon DB] Updated ${updated.rowCount} products to 80% discount!`);
+      }
+    }
+  } catch (err) {
+    console.error('[Neon DB] Initialization check error:', err.message);
+  }
+}
+ensureDatabaseInitialized();
+
 export default apiApp;
+

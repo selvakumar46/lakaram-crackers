@@ -42,7 +42,7 @@ export default function ProductGrid() {
             </span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            All prices include flat 75% festival discount directly from Sivakasi factory.
+            All prices include flat 80% festival discount directly from Sivakasi factory.
           </p>
         </div>
 

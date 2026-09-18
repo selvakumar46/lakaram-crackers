@@ -123,7 +123,7 @@ export default function OrderSuccessModal() {
               <span className="line-through">₹{completedOrder.actualValue.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-emerald-400 font-semibold print:text-green-700">
-              <span>Diwali Festive Savings (75% Off):</span>
+              <span>Diwali Festive Savings (80% Off):</span>
               <span>- ₹{completedOrder.festiveDiscount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-slate-400 print:text-gray-600">

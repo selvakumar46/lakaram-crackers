@@ -313,7 +313,7 @@ export default function CheckoutModal() {
                   <span className="line-through">₹{actualTotal.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-emerald-400 font-semibold">
-                  <span>Festival Discount (75% Off):</span>
+                  <span>Festival Discount (80% Off):</span>
                   <span>- ₹{festiveSavings.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-slate-400">

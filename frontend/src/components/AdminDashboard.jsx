@@ -55,8 +55,8 @@ export default function AdminDashboard({ onClose }) {
     description: '',
     packSize: '1 Box (10 Pcs)',
     originalPrice: 200,
-    discountPercent: 75,
-    discountedPrice: 50,
+    discountPercent: 80,
+    discountedPrice: 40,
     soundLevel: 'Low',
     kidSafe: false,
     greenCrackerCertified: true,
@@ -140,7 +140,7 @@ export default function AdminDashboard({ onClose }) {
   // Pricing auto-calculation
   const handleOriginalPriceChange = (val) => {
     const original = parseFloat(val) || 0;
-    const disc = formData.discountPercent || 75;
+    const disc = formData.discountPercent || 80;
     const discounted = Math.round(original * (100 - disc) / 100);
     setFormData(prev => ({
       ...prev,
@@ -218,7 +218,7 @@ export default function AdminDashboard({ onClose }) {
       description: prod.description || '',
       packSize: prod.packSize || '1 Box',
       originalPrice: prod.originalPrice,
-      discountPercent: prod.discountPercent || 75,
+      discountPercent: prod.discountPercent || 80,
       discountedPrice: prod.discountedPrice,
       soundLevel: prod.soundLevel || 'Low',
       kidSafe: prod.kidSafe || false,
@@ -777,7 +777,7 @@ export default function AdminDashboard({ onClose }) {
                       <th className="py-3 px-3">Product Name</th>
                       <th className="py-3 px-3">Category</th>
                       <th className="py-3 px-3 text-right">Actual</th>
-                      <th className="py-3 px-3 text-right">75% Offer</th>
+                      <th className="py-3 px-3 text-right">80% Offer</th>
                       <th className="py-3 px-3 text-center">Stock</th>
                       <th className="py-3 px-3 text-center w-24">Actions</th>
                     </tr>

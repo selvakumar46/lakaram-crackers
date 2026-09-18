@@ -93,7 +93,7 @@ export default function QuickOrderSheet() {
           <div className="flex items-center gap-3">
             <div className="bg-black/40 px-3 py-1.5 rounded-xl border border-slate-700/60 text-right">
               <span className="text-[10px] text-slate-400 block uppercase font-bold">Standard Discount</span>
-              <span className="text-sm font-black text-amber-400">FLAT 75% OFF</span>
+              <span className="text-sm font-black text-amber-400">FLAT 80% OFF</span>
             </div>
             {totalItemCount > 0 && (
               <button
@@ -191,7 +191,7 @@ export default function QuickOrderSheet() {
                       <th className="py-2.5 px-3">Product Name & Specifications</th>
                       <th className="py-2.5 px-3 w-28 text-center">Pack Size</th>
                       <th className="py-2.5 px-3 w-24 text-right">Actual Rate</th>
-                      <th className="py-2.5 px-3 w-24 text-right">75% Offer</th>
+                      <th className="py-2.5 px-3 w-24 text-right">80% Offer</th>
                       <th className="py-2.5 px-3 w-36 text-center">Quantity</th>
                       <th className="py-2.5 px-3 w-28 text-right font-bold">Total (₹)</th>
                     </tr>
@@ -374,7 +374,7 @@ export default function QuickOrderSheet() {
             </div>
 
             <div>
-              <span className="text-[9px] sm:text-[10px] text-emerald-400 block uppercase font-semibold">75% Savings</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-400 block uppercase font-semibold">80% Savings</span>
               <span className="text-xs sm:text-base font-extrabold text-emerald-400">
                 ₹{festiveSavings.toFixed(0)}
               </span>

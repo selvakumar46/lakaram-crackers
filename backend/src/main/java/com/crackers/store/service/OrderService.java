@@ -43,7 +43,7 @@ public class OrderService {
             if (prodOpt.isPresent()) {
                 actualValue += prodOpt.get().getOriginalPrice() * item.getQuantity();
             } else {
-                actualValue += (item.getPrice() * 4) * item.getQuantity(); // approx 75% off
+                actualValue += (item.getPrice() * 5) * item.getQuantity(); // approx 80% off
             }
         }
 
@@ -110,7 +110,7 @@ public class OrderService {
 
         sb.append("--------------------------------------\n");
         sb.append("💰 *Subtotal:* ₹").append(String.format("%.2f", order.getSubtotal())).append("\n");
-        sb.append("🎉 *You Saved:* ₹").append(String.format("%.2f", order.getFestiveDiscount())).append(" (75% Off)\n");
+        sb.append("🎉 *You Saved:* ₹").append(String.format("%.2f", order.getFestiveDiscount())).append(" (80% Off)\n");
         sb.append("🚚 *Packing & Transport:* ₹").append(String.format("%.2f", order.getPackingAndForwarding())).append("\n");
         sb.append("⭐️ *TOTAL PAYABLE:* ₹").append(String.format("%.2f", order.getGrandTotal())).append("\n");
         sb.append("--------------------------------------\n");

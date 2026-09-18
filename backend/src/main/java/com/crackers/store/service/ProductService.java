@@ -47,213 +47,213 @@ public class ProductService {
         // 1. Sparklers
         defaults.add(new Product("SPK-01", "10cm Electric Sparklers", "sparklers", 
             "Bright silver metallic sparkles with low smoke emission.", "1 Box (10 Pcs)", 
-            160.0, 40.0, 75, "Zero Sound", true, true, 
+            160.0, 32.0, 80, "Zero Sound", true, true, 
             "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=500&auto=format&fit=crop&q=60", 
             120, 5, ""));
 
         defaults.add(new Product("SPK-02", "12cm Colour Sparklers", "sparklers", 
             "Vibrant multi-color sparks (Red, Green, Gold) for festive joy.", "1 Box (10 Pcs)", 
-            220.0, 55.0, 75, "Zero Sound", true, true, 
+            220.0, 44.0, 80, "Zero Sound", true, true, 
             "https://images.unsplash.com/photo-1531844251246-9a1bfaae09fc?w=500&auto=format&fit=crop&q=60", 
             95, 5, ""));
 
         defaults.add(new Product("SPK-03", "15cm Green Sparklers", "sparklers", 
             "Long burning emerald green sparkling display.", "1 Box (10 Pcs)", 
-            260.0, 65.0, 75, "Zero Sound", true, true, 
+            260.0, 52.0, 80, "Zero Sound", true, true, 
             "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=500&auto=format&fit=crop&q=60", 
             80, 4, ""));
 
         defaults.add(new Product("SPK-04", "30cm Mega Gold Sparklers", "sparklers", 
             "Extra-long burning giant golden sparklers lasting over 90 seconds.", "1 Box (5 Pcs)", 
-            360.0, 90.0, 75, "Zero Sound", true, true, 
+            360.0, 72.0, 80, "Zero Sound", true, true, 
             "https://images.unsplash.com/photo-1513297887119-d46091b24bfa?w=500&auto=format&fit=crop&q=60", 
             60, 5, ""));
 
         defaults.add(new Product("SPK-05", "50cm Giant Night Sparklers", "sparklers", 
             "Premium wedding and grand Diwali night mega sparkler wand.", "1 Box (5 Pcs)", 
-            500.0, 125.0, 75, "Zero Sound", true, true, 
+            500.0, 100.0, 80, "Zero Sound", true, true, 
             "https://images.unsplash.com/photo-1543257580-7269da773bf5?w=500&auto=format&fit=crop&q=60", 
             40, 5, ""));
 
         // 2. Ground Chakkars
         defaults.add(new Product("CHK-01", "Ground Chakkar Special", "chakkars", 
             "Smooth fast spinning ground spinner with golden rings.", "1 Box (10 Pcs)", 
-            240.0, 60.0, 75, "Low", true, true, 
+            240.0, 48.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=500&auto=format&fit=crop&q=60", 
             150, 4, ""));
 
         defaults.add(new Product("CHK-02", "Ground Chakkar Deluxe", "chakkars", 
             "High RPM rotating spinner with dual colored silver fire ring.", "1 Box (10 Pcs)", 
-            360.0, 90.0, 75, "Low", true, true, 
+            360.0, 72.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1533230807127-716665511457?w=500&auto=format&fit=crop&q=60", 
             110, 5, ""));
 
         defaults.add(new Product("CHK-03", "Chakkar Plastic Big (Whistling)", "chakkars", 
             "Plastic wheel spinner with high pitch musical whistle and shower.", "1 Box (10 Pcs)", 
-            560.0, 140.0, 75, "Medium", false, true, 
+            560.0, 112.0, 80, "Medium", false, true, 
             "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=60", 
             75, 5, ""));
 
         defaults.add(new Product("CHK-04", "Ashoka Wheel Supreme", "chakkars", 
             "Large diameter prolonged ground swirl with multi-stage color transition.", "1 Box (5 Pcs)", 
-            680.0, 170.0, 75, "Low", true, true, 
+            680.0, 136.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&auto=format&fit=crop&q=60", 
             50, 5, ""));
 
         // 3. Flower Pots
         defaults.add(new Product("FLP-01", "Flower Pots Big", "flower-pots", 
             "Rich golden shower fountain erupting 10-12 feet high.", "1 Box (10 Pcs)", 
-            320.0, 80.0, 75, "Low", true, true, 
+            320.0, 64.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60", 
             140, 4, ""));
 
         defaults.add(new Product("FLP-02", "Flower Pots Special", "flower-pots", 
             "Denser fountain with silver glitter and amber fireflies.", "1 Box (10 Pcs)", 
-            440.0, 110.0, 75, "Low", true, true, 
+            440.0, 88.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=500&auto=format&fit=crop&q=60", 
             90, 5, ""));
 
         defaults.add(new Product("FLP-03", "Flower Pots Ashoka Deluxe", "flower-pots", 
             "Massive high-volume fountain reaching 18 feet with dual flame core.", "1 Box (10 Pcs)", 
-            600.0, 150.0, 75, "Low", true, true, 
+            600.0, 120.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=500&auto=format&fit=crop&q=60", 
             70, 5, ""));
 
         defaults.add(new Product("FLP-04", "Colour Koti (Multi-Colour Fountain)", "flower-pots", 
             "3-in-1 cascading color transformation: Red to Emerald to Sparkling Gold.", "1 Box (5 Pcs)", 
-            720.0, 180.0, 75, "Low", true, true, 
+            720.0, 144.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1533230807127-716665511457?w=500&auto=format&fit=crop&q=60", 
             60, 5, ""));
 
         // 4. Rockets & Missiles
         defaults.add(new Product("RCK-01", "Baby Rocket", "rockets", 
             "Classic single burst high altitude whistling rocket.", "1 Box (10 Pcs)", 
-            280.0, 70.0, 75, "Medium", false, true, 
+            280.0, 56.0, 80, "Medium", false, true, 
             "https://images.unsplash.com/photo-1513297887119-d46091b24bfa?w=500&auto=format&fit=crop&q=60", 
             85, 4, ""));
 
         defaults.add(new Product("RCK-02", "Whistling Bomb Rocket", "rockets", 
             "Ascending screamer with loud concussion burst at apex.", "1 Box (10 Pcs)", 
-            480.0, 120.0, 75, "High", false, true, 
+            480.0, 96.0, 80, "High", false, true, 
             "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=500&auto=format&fit=crop&q=60", 
             70, 5, ""));
 
         defaults.add(new Product("RCK-03", "Lunik Sky Rocket Deluxe", "rockets", 
             "High flight missile with parachute release and glitter trail.", "1 Box (5 Pcs)", 
-            640.0, 160.0, 75, "High", false, true, 
+            640.0, 128.0, 80, "High", false, true, 
             "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=60", 
             50, 5, ""));
 
         // 5. Multi Sky Shots
         defaults.add(new Product("SHT-01", "12 Shots Sky Rider", "aerial-shots", 
             "12 consecutive aerial bursts with red pearls and golden brocade.", "1 Box (1 Pc)", 
-            760.0, 190.0, 75, "Medium", false, true, 
+            760.0, 152.0, 80, "Medium", false, true, 
             "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60", 
             80, 5, ""));
 
         defaults.add(new Product("SHT-02", "30 Shots Symphony", "aerial-shots", 
             "Continuous 30 sky explosions filling the night sky with multicolored stars.", "1 Box (1 Pc)", 
-            1600.0, 400.0, 75, "Medium", false, true, 
+            1600.0, 320.0, 80, "Medium", false, true, 
             "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=500&auto=format&fit=crop&q=60", 
             45, 5, ""));
 
         defaults.add(new Product("SHT-03", "60 Shots Grand Celebration", "aerial-shots", 
             "Massive party repeater with crackling willow and strobe bouquet.", "1 Box (1 Pc)", 
-            3200.0, 800.0, 75, "Medium", false, true, 
+            3200.0, 640.0, 80, "Medium", false, true, 
             "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=500&auto=format&fit=crop&q=60", 
             25, 5, ""));
 
         defaults.add(new Product("SHT-04", "120 Shots Bollywood Night", "aerial-shots", 
             "The ultimate fireworks showstopper. 2-minute non-stop aerial fireworks display.", "1 Box (1 Pc)", 
-            6000.0, 1500.0, 75, "High", false, true, 
+            6000.0, 1200.0, 80, "High", false, true, 
             "https://images.unsplash.com/photo-1533230807127-716665511457?w=500&auto=format&fit=crop&q=60", 
             15, 5, ""));
 
         // 6. Sound Crackers
         defaults.add(new Product("SND-01", "28 Chorsa Classic Sound Strip", "sound-crackers", 
             "Traditional crisp continuous crackers for auspicious beginnings.", "1 Pack (10 Pcs)", 
-            200.0, 50.0, 75, "Medium", false, true, 
+            200.0, 40.0, 80, "Medium", false, true, 
             "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&auto=format&fit=crop&q=60", 
             100, 4, ""));
 
         defaults.add(new Product("SND-02", "Red Bijili Crackers (Stripped)", "sound-crackers", 
             "High quality fast firing red bijili packet.", "1 Bag (100 Pcs)", 
-            240.0, 60.0, 75, "Medium", false, true, 
+            240.0, 48.0, 80, "Medium", false, true, 
             "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=500&auto=format&fit=crop&q=60", 
             150, 4, ""));
 
         defaults.add(new Product("SND-03", "1000 Wala Festive Garland", "sound-crackers", 
             "Grand continuous celebration roll firing for 90 seconds.", "1 Box (1 Pc)", 
-            1200.0, 300.0, 75, "High", false, true, 
+            1200.0, 240.0, 80, "High", false, true, 
             "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=60", 
             40, 5, ""));
 
         defaults.add(new Product("SND-04", "5000 Wala Royal Maharaja Garland", "sound-crackers", 
             "Extra-long 5000 cracker garland for grand community celebrations.", "1 Box (1 Pc)", 
-            5200.0, 1300.0, 75, "High", false, true, 
+            5200.0, 1040.0, 80, "High", false, true, 
             "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=500&auto=format&fit=crop&q=60", 
             15, 5, ""));
 
         // 7. Atom Bombs
         defaults.add(new Product("BMB-01", "Hydro Bomb Green", "atom-bombs", 
             "Classic green wrapped medium concussion explosive sound.", "1 Box (10 Pcs)", 
-            240.0, 60.0, 75, "High", false, true, 
+            240.0, 48.0, 80, "High", false, true, 
             "https://images.unsplash.com/photo-1513297887119-d46091b24bfa?w=500&auto=format&fit=crop&q=60", 
             80, 4, ""));
 
         defaults.add(new Product("BMB-02", "Classic Bullet Bomb", "atom-bombs", 
             "Jute wrapped heavy blast cracker with prolonged safety fuse.", "1 Box (10 Pcs)", 
-            360.0, 90.0, 75, "High", false, true, 
+            360.0, 72.0, 80, "High", false, true, 
             "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60", 
             65, 5, ""));
 
         defaults.add(new Product("BMB-03", "King of Kings Digital Bomb", "atom-bombs", 
             "Deep bass resonant echo sound cracker with reinforced paper casing.", "1 Box (10 Pcs)", 
-            480.0, 120.0, 75, "High", false, true, 
+            480.0, 96.0, 80, "High", false, true, 
             "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=500&auto=format&fit=crop&q=60", 
             50, 5, ""));
 
         // 8. Gift Boxes
         defaults.add(new Product("GFT-01", "Mini Joy Box (22 Items Assortment)", "gift-boxes", 
             "Ideal for small families and beginners. Contains sparklers, pots, chakkars, and sound crackers.", "1 Hamper Box", 
-            2800.0, 699.0, 75, "Mixed", true, true, 
+            2800.0, 560.0, 80, "Mixed", true, true, 
             "https://images.unsplash.com/photo-1543257580-7269da773bf5?w=500&auto=format&fit=crop&q=60", 
             40, 5, ""));
 
         defaults.add(new Product("GFT-02", "Family Super Delight (36 Items)", "gift-boxes", 
             "Popular family pack including aerial shots, fountains, giant sparklers and fancy novelties.", "1 Hamper Box", 
-            4800.0, 1199.0, 75, "Mixed", true, true, 
+            4800.0, 960.0, 80, "Mixed", true, true, 
             "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&auto=format&fit=crop&q=60", 
             30, 5, ""));
 
         defaults.add(new Product("GFT-03", "VIP Grand Celebration Box (55 Items)", "gift-boxes", 
             "Luxury hamper with 30-shot repeater, Ashoka pots, whistle rockets, and mega sparklers.", "1 Luxury Box", 
-            8000.0, 1999.0, 75, "Mixed", true, true, 
+            8000.0, 1600.0, 80, "Mixed", true, true, 
             "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=500&auto=format&fit=crop&q=60", 
             20, 5, ""));
 
         // 9. Kids Special
         defaults.add(new Product("KID-01", "Magic Pop Pop Crackers", "kids-special", 
             "Snap drops that burst on throwing. No matchstick or fire required. Completely kid-safe.", "1 Box (50 Pcs)", 
-            160.0, 40.0, 75, "Low", true, true, 
+            160.0, 32.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1531844251246-9a1bfaae09fc?w=500&auto=format&fit=crop&q=60", 
             200, 5, ""));
 
         defaults.add(new Product("KID-02", "Black Magic Snake Eggs", "kids-special", 
             "Classic black tablets that grow into long mystical snakes when lit.", "1 Box (10 Pcs)", 
-            120.0, 30.0, 75, "Zero Sound", true, true, 
+            120.0, 24.0, 80, "Zero Sound", true, true, 
             "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=500&auto=format&fit=crop&q=60", 
             180, 5, ""));
 
         defaults.add(new Product("KID-03", "Colour Matches / Rainbow Sticks", "kids-special", 
             "Matchsticks that burn with glowing blue, green, and pink flames.", "1 Box (10 Matchboxes)", 
-            160.0, 40.0, 75, "Zero Sound", true, true, 
+            160.0, 32.0, 80, "Zero Sound", true, true, 
             "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=500&auto=format&fit=crop&q=60", 
             130, 4, ""));
 
         defaults.add(new Product("KID-04", "Peacock Feathers Fountain", "kids-special", 
             "Gentle, colorful table fountain shaped like a peacock spreading wings.", "1 Box (5 Pcs)", 
-            360.0, 90.0, 75, "Low", true, true, 
+            360.0, 72.0, 80, "Low", true, true, 
             "https://images.unsplash.com/photo-1533230807127-716665511457?w=500&auto=format&fit=crop&q=60", 
             70, 5, ""));
 

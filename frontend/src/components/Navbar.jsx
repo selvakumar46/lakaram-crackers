@@ -48,7 +48,7 @@ export default function Navbar() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
           </span>
           <p className="truncate">
-            ✨ <strong>Diwali Mega Discount:</strong> Flat 75% Off Directly from Sivakasi Factory • 100% Eco-Friendly Green Crackers
+            ✨ <strong>Diwali Mega Discount:</strong> Flat 80% Off Directly from Sivakasi Factory • 100% Eco-Friendly Green Crackers
           </p>
         </div>
 

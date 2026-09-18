@@ -37,7 +37,7 @@ export default function FestiveHero() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold mb-5 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
             <span>Diwali 2026 Festival Booking Open</span>
-            <span className="bg-red-600 text-white text-[10px] px-2 py-0.2 rounded-full font-bold">75% OFF</span>
+            <span className="bg-red-600 text-white text-[10px] px-2 py-0.2 rounded-full font-bold">80% OFF</span>
           </div>
 
           {/* Heading */}
@@ -76,7 +76,7 @@ export default function FestiveHero() {
                 <div className="p-1.5 rounded-lg bg-red-500/10 text-red-400">
                   <Sparkles className="w-4 h-4" />
                 </div>
-                <h4 className="text-xs font-bold text-white">Flat 75% Discount</h4>
+                <h4 className="text-xs font-bold text-white">Flat 80% Discount</h4>
               </div>
               <p className="text-[11px] text-slate-400">Direct factory prices without middlemen markups.</p>
             </div>

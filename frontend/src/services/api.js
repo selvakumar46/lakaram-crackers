@@ -1,4 +1,4 @@
-﻿import { DEFAULT_PRODUCTS, CATEGORIES } from '../data/defaultProducts';
+import { DEFAULT_PRODUCTS, CATEGORIES } from '../data/defaultProducts';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -187,7 +187,7 @@ export const submitOrder = async (orderPayload) => {
     console.info('Backend order endpoint unreachable, creating client-side order confirmation:', err.message);
     const orderId = 'CRK-' + Math.floor(100000 + Math.random() * 900000);
     const subtotal = orderPayload.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const actualValue = subtotal * 4;
+    const actualValue = subtotal * 5;
     const festiveDiscount = actualValue - subtotal;
     const packingAndForwarding = subtotal > 3000 ? 0 : 150;
     const grandTotal = subtotal + packingAndForwarding;
@@ -209,7 +209,7 @@ export const submitOrder = async (orderPayload) => {
     });
     msg += `--------------------------------------\n`;
     msg += `💰 *Subtotal:* ₹${subtotal.toFixed(2)}\n`;
-    msg += `🎉 *Festive Savings (75% Off):* ₹${festiveDiscount.toFixed(2)}\n`;
+    msg += `🎉 *Festive Savings (80% Off):* ₹${festiveDiscount.toFixed(2)}\n`;
     msg += `🚚 *Packing & Transport:* ₹${packingAndForwarding.toFixed(2)}\n`;
     msg += `⭐️ *TOTAL PAYABLE:* ₹${grandTotal.toFixed(2)}\n`;
     msg += `--------------------------------------\n`;
