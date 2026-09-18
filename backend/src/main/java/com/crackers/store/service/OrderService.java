@@ -53,7 +53,7 @@ public class OrderService {
 
         OrderResponse response = new OrderResponse();
         response.setOrderId(orderId);
-        response.setStatus("CONFIRMED");
+        response.setStatus("PENDING");
         response.setOrderDate(LocalDateTime.now());
         response.setCustomerName(request.getCustomerName());
         response.setPhone(request.getPhone());
@@ -84,6 +84,16 @@ public class OrderService {
 
     public List<OrderResponse> getAllOrders() {
         return orderRepository.findAllByOrderByOrderDateDesc();
+    }
+
+    public Optional<OrderResponse> updateOrderStatus(String orderId, String newStatus) {
+        Optional<OrderResponse> opt = orderRepository.findById(orderId);
+        if (opt.isPresent()) {
+            OrderResponse order = opt.get();
+            order.setStatus(newStatus.toUpperCase().trim());
+            return Optional.of(orderRepository.save(order));
+        }
+        return Optional.empty();
     }
 
     private String formatWhatsAppMessage(OrderResponse order) {

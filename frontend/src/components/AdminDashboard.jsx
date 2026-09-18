@@ -21,9 +21,23 @@ import {
   EyeOff,
   User,
   LogOut,
-  KeyRound
+  KeyRound,
+  Clock,
+  Printer,
+  Truck,
+  Phone,
+  MapPin,
+  Calendar,
+  FileText,
+  MessageCircle,
+  X,
+  ChevronRight,
+  Check,
+  CheckCircle,
+  ExternalLink,
+  ChevronDown
 } from 'lucide-react';
-import { fetchProducts, createProduct, updateProduct, deleteProduct, fetchOrders } from '../services/api';
+import { fetchProducts, createProduct, updateProduct, deleteProduct, fetchOrders, updateOrderStatus } from '../services/api';
 import { CATEGORIES } from '../data/defaultProducts';
 import { useCart } from '../context/CartContext';
 
@@ -46,6 +60,9 @@ export default function AdminDashboard({ onClose }) {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
+  const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
 
   // Form State
   const initialForm = {
@@ -81,6 +98,98 @@ export default function AdminDashboard({ onClose }) {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId, newStatus, e) => {
+    if (e) e.stopPropagation();
+    setUpdatingOrderId(orderId);
+    try {
+      await updateOrderStatus(orderId, newStatus);
+      setOrders(prev => prev.map(o => o.orderId === orderId ? { ...o, status: newStatus } : o));
+      if (selectedOrderForInvoice && selectedOrderForInvoice.orderId === orderId) {
+        setSelectedOrderForInvoice(prev => ({ ...prev, status: newStatus }));
+      }
+    } catch (err) {
+      console.error('Error updating order status:', err);
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  const getStatusConfig = (status) => {
+    const s = (status || 'PENDING').toUpperCase();
+    switch (s) {
+      case 'PENDING':
+        return {
+          label: 'PENDING',
+          badgeClass: 'bg-amber-950/90 text-amber-300 border border-amber-500/40',
+          dotClass: 'bg-amber-400 animate-pulse',
+          icon: Clock,
+          nextStatus: 'ACCEPTED',
+          nextLabel: 'Accept Order',
+          step: 1
+        };
+      case 'ACCEPTED':
+        return {
+          label: 'ACCEPTED',
+          badgeClass: 'bg-sky-950/90 text-sky-300 border border-sky-500/40',
+          dotClass: 'bg-sky-400',
+          icon: CheckCircle2,
+          nextStatus: 'PACKED',
+          nextLabel: 'Mark as Packed',
+          step: 2
+        };
+      case 'PACKED':
+        return {
+          label: 'PACKED',
+          badgeClass: 'bg-purple-950/90 text-purple-300 border border-purple-500/40',
+          dotClass: 'bg-purple-400',
+          icon: Package,
+          nextStatus: 'DISPATCHED',
+          nextLabel: 'Mark as Dispatched',
+          step: 3
+        };
+      case 'DISPATCHED':
+        return {
+          label: 'DISPATCHED',
+          badgeClass: 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/40',
+          dotClass: 'bg-emerald-400',
+          icon: Truck,
+          nextStatus: 'DELIVERED',
+          nextLabel: 'Mark as Delivered',
+          step: 4
+        };
+      case 'DELIVERED':
+        return {
+          label: 'DELIVERED',
+          badgeClass: 'bg-teal-950/90 text-teal-300 border border-teal-500/40',
+          dotClass: 'bg-teal-400',
+          icon: CheckCircle,
+          nextStatus: null,
+          nextLabel: null,
+          step: 5
+        };
+      case 'CANCELLED':
+        return {
+          label: 'CANCELLED',
+          badgeClass: 'bg-red-950/90 text-red-300 border border-red-500/40',
+          dotClass: 'bg-red-400',
+          icon: XCircle,
+          nextStatus: null,
+          nextLabel: null,
+          step: 0
+        };
+      default:
+        return {
+          label: s,
+          badgeClass: 'bg-sky-950/90 text-sky-300 border border-sky-500/40',
+          dotClass: 'bg-sky-400',
+          icon: CheckCircle2,
+          nextStatus: 'PACKED',
+          nextLabel: 'Mark as Packed',
+          step: 2
+        };
     }
   };
 
@@ -853,59 +962,537 @@ export default function AdminDashboard({ onClose }) {
         {/* TAB 3: ORDERS TAB */}
         {activeTab === 'orders' && (
           <div className="space-y-4">
-            <div className="bg-[#121625] p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <div className="bg-[#121625] p-4 rounded-2xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="font-bold text-white text-base font-serif">Customer Orders Received</h3>
-                <p className="text-xs text-slate-400">Track online inquiries and WhatsApp bill submissions.</p>
+                <h3 className="font-bold text-white text-base font-serif flex items-center gap-2">
+                  <span>Customer Orders Received</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-sans font-bold border border-amber-500/30">
+                    {orders.length}
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">Click any order to view ordered items, generate invoice, and manage status.</p>
               </div>
-              <button
-                onClick={loadData}
-                className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Refresh</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={loadData}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Refresh</span>
+                </button>
+              </div>
             </div>
 
+            {/* Status Filter Tabs */}
+            <div className="flex flex-wrap items-center gap-2">
+              {[
+                { id: 'all', label: 'All Orders', count: orders.length },
+                { id: 'PENDING', label: 'Pending', count: orders.filter(o => (o.status || 'PENDING').toUpperCase() === 'PENDING').length },
+                { id: 'ACCEPTED', label: 'Accepted', count: orders.filter(o => (o.status || '').toUpperCase() === 'ACCEPTED').length },
+                { id: 'PACKED', label: 'Packed', count: orders.filter(o => (o.status || '').toUpperCase() === 'PACKED').length },
+                { id: 'DISPATCHED', label: 'Dispatched', count: orders.filter(o => (o.status || '').toUpperCase() === 'DISPATCHED').length },
+                { id: 'DELIVERED', label: 'Delivered', count: orders.filter(o => (o.status || '').toUpperCase() === 'DELIVERED').length },
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setOrderStatusFilter(f.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    orderStatusFilter === f.id
+                      ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                      : 'bg-[#121625] text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <span>{f.label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    orderStatusFilter === f.id ? 'bg-slate-950/30 text-slate-950' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {f.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Orders List */}
             {orders.length === 0 ? (
               <div className="text-center py-16 bg-[#121625] rounded-2xl border border-slate-800 text-slate-400 text-xs">
                 No orders received yet. Once customers order through the website or WhatsApp, they will appear here.
               </div>
+            ) : orders.filter(o => orderStatusFilter === 'all' || (o.status || 'PENDING').toUpperCase() === orderStatusFilter).length === 0 ? (
+              <div className="text-center py-12 bg-[#121625] rounded-2xl border border-slate-800 text-slate-400 text-xs">
+                No orders with status "{orderStatusFilter}".
+              </div>
             ) : (
               <div className="space-y-3">
-                {orders.map((ord, idx) => (
-                  <div key={idx} className="bg-[#121625] rounded-2xl border border-slate-800 p-4 space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-amber-300 text-xs">{ord.orderId}</span>
-                        <span className="bg-emerald-950 text-emerald-300 text-[10px] px-2 py-0.2 rounded font-bold">
-                          {ord.status}
-                        </span>
-                      </div>
-                      <span className="text-xs font-black text-white">
-                        Total: ₹{(ord.grandTotal || ord.subtotal || 0).toFixed(2)}
-                      </span>
-                    </div>
+                {orders
+                  .filter(o => orderStatusFilter === 'all' || (o.status || 'PENDING').toUpperCase() === orderStatusFilter)
+                  .map((ord, idx) => {
+                    const statusCfg = getStatusConfig(ord.status);
+                    const StatusIcon = statusCfg.icon;
+                    const isUpdating = updatingOrderId === ord.orderId;
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300 pt-1">
-                      <div>
-                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Customer</span>
-                        <span className="font-semibold text-white">{ord.customerName}</span>
-                        <span className="block text-slate-400">{ord.phone}</span>
+                    return (
+                      <div
+                        key={ord.orderId || idx}
+                        onClick={() => setSelectedOrderForInvoice(ord)}
+                        className="bg-[#121625] hover:bg-[#161a29] rounded-2xl border border-slate-800 hover:border-amber-500/50 p-4 space-y-3 transition-all cursor-pointer group shadow-sm hover:shadow-lg hover:shadow-black/40"
+                      >
+                        {/* Card Top Row */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+                          <div className="flex items-center gap-2.5">
+                            <span className="font-mono font-bold text-amber-400 text-sm group-hover:underline">
+                              {ord.orderId}
+                            </span>
+                            <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1.5 ${statusCfg.badgeClass}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dotClass}`}></span>
+                              <StatusIcon className="w-3 h-3" />
+                              <span>{statusCfg.label}</span>
+                            </span>
+                            {ord.orderDate && (
+                              <span className="text-[11px] text-slate-400 hidden sm:inline-flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(ord.orderDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Amount</span>
+                            <span className="text-sm font-black text-amber-300">
+                              ₹{(ord.grandTotal || ord.subtotal || 0).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Card Middle Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-300">
+                          <div>
+                            <span className="text-[10px] text-slate-500 block uppercase font-bold">Customer</span>
+                            <span className="font-semibold text-white block">{ord.customerName}</span>
+                            <span className="text-slate-400 flex items-center gap-1 mt-0.5">
+                              <Phone className="w-3 h-3 text-slate-500" />
+                              {ord.phone}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block uppercase font-bold">Delivery Address</span>
+                            <span className="text-slate-300 truncate block">{ord.deliveryAddress || 'Direct Pickup / Sivakasi'}</span>
+                            {ord.pincode && <span className="text-slate-400 text-[11px]">PIN: {ord.pincode}</span>}
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block uppercase font-bold">Items Ordered</span>
+                            <span className="text-white font-medium block">
+                              {ord.items?.length || ord.totalItemCount || 0} cracker products
+                            </span>
+                            <span className="text-[11px] text-amber-400/80 font-medium">
+                              Payment: {ord.paymentMethod || 'WhatsApp'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Card Bottom Actions Row */}
+                        <div
+                          className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/60"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex items-center gap-2">
+                            {/* Quick Next Lifecycle Action */}
+                            {statusCfg.nextStatus && (
+                              <button
+                                disabled={isUpdating}
+                                onClick={(e) => handleUpdateOrderStatus(ord.orderId, statusCfg.nextStatus, e)}
+                                className={`text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all shadow-sm ${
+                                  statusCfg.nextStatus === 'ACCEPTED'
+                                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                                    : statusCfg.nextStatus === 'PACKED'
+                                    ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                                    : 'bg-sky-600 hover:bg-sky-500 text-white'
+                                }`}
+                              >
+                                {isUpdating ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Check className="w-3.5 h-3.5" />
+                                )}
+                                <span>{statusCfg.nextLabel}</span>
+                              </button>
+                            )}
+
+                            {/* Status Changer Dropdown */}
+                            <select
+                              value={(ord.status || 'PENDING').toUpperCase()}
+                              disabled={isUpdating}
+                              onChange={(e) => handleUpdateOrderStatus(ord.orderId, e.target.value, e)}
+                              className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500"
+                            >
+                              <option value="PENDING">Pending</option>
+                              <option value="ACCEPTED">Accepted</option>
+                              <option value="PACKED">Packed</option>
+                              <option value="DISPATCHED">Dispatched</option>
+                              <option value="DELIVERED">Delivered</option>
+                              <option value="CANCELLED">Cancelled</option>
+                            </select>
+                          </div>
+
+                          {/* View Invoice Button */}
+                          <button
+                            onClick={() => setSelectedOrderForInvoice(ord)}
+                            className="text-xs px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 font-semibold flex items-center gap-1.5 transition-colors border border-slate-700"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>View Invoice</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Delivery Address</span>
-                        <span className="text-slate-300 truncate block">{ord.deliveryAddress} - {ord.pincode}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Items Count</span>
-                        <span className="text-slate-300">{ord.items?.length || ord.totalItemCount || 0} items ordered</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ORDER INVOICE MODAL */}
+        {selectedOrderForInvoice && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 print:p-0 print:bg-white print:static print:h-auto">
+            <div className="bg-[#121625] border border-amber-500/30 rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden my-auto print:border-none print:shadow-none print:text-black print:bg-white print:m-0 print:w-full">
+              
+              {/* Modal Top Action Bar (hidden on print) */}
+              <div className="bg-[#0f121e] px-5 py-3 text-white flex items-center justify-between border-b border-slate-800 print:hidden">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-amber-400" />
+                  <span className="text-xs font-bold font-mono text-amber-300">
+                    INVOICE #{selectedOrderForInvoice.orderId}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors border border-slate-700"
+                    title="Print Invoice / Save PDF"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Print Bill</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedOrderForInvoice(null)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors"
+                    title="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Progression Stepper (hidden on print) */}
+              <div className="bg-[#161a29] p-4 border-b border-slate-800 print:hidden">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-300 uppercase">Order Status:</span>
+                    {(() => {
+                      const cfg = getStatusConfig(selectedOrderForInvoice.status);
+                      const Icon = cfg.icon;
+                      return (
+                        <span className={`text-xs px-3 py-0.5 rounded-full font-bold flex items-center gap-1.5 ${cfg.badgeClass}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dotClass}`}></span>
+                          <Icon className="w-3.5 h-3.5" />
+                          <span>{cfg.label}</span>
+                        </span>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Status Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400">Change:</span>
+                    <select
+                      value={(selectedOrderForInvoice.status || 'PENDING').toUpperCase()}
+                      disabled={updatingOrderId === selectedOrderForInvoice.orderId}
+                      onChange={(e) => handleUpdateOrderStatus(selectedOrderForInvoice.orderId, e.target.value)}
+                      className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:outline-none focus:border-amber-500"
+                    >
+                      <option value="PENDING">Pending</option>
+                      <option value="ACCEPTED">Accepted</option>
+                      <option value="PACKED">Packed</option>
+                      <option value="DISPATCHED">Dispatched</option>
+                      <option value="DELIVERED">Delivered</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 4-Step Visual Progress Bar */}
+                <div className="grid grid-cols-4 gap-2 pt-1">
+                  {[
+                    { id: 'PENDING', label: '1. Pending', icon: Clock },
+                    { id: 'ACCEPTED', label: '2. Accepted', icon: CheckCircle2 },
+                    { id: 'PACKED', label: '3. Packed', icon: Package },
+                    { id: 'DISPATCHED', label: '4. Dispatched', icon: Truck },
+                  ].map((stepItem, sIdx) => {
+                    const currentStep = getStatusConfig(selectedOrderForInvoice.status).step;
+                    const stepNum = sIdx + 1;
+                    const isPassed = currentStep >= stepNum;
+                    const isCurrent = currentStep === stepNum;
+
+                    return (
+                      <button
+                        key={stepItem.id}
+                        disabled={updatingOrderId === selectedOrderForInvoice.orderId}
+                        onClick={() => handleUpdateOrderStatus(selectedOrderForInvoice.orderId, stepItem.id)}
+                        className={`p-2 rounded-xl text-left transition-all border ${
+                          isCurrent
+                            ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                            : isPassed
+                            ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
+                            : 'bg-slate-900/60 border-slate-800 text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 text-[11px]">
+                          <stepItem.icon className="w-3.5 h-3.5" />
+                          <span>{stepItem.label}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Printable Invoice Area */}
+              <div id="printable-invoice" className="p-6 space-y-5 print:p-6 print:space-y-4 print:bg-white print:text-black">
+                
+                {/* Invoice Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5 print:border-gray-300">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🎆</span>
+                      <h2 className="text-xl font-black text-amber-400 font-serif tracking-wide print:text-black">
+                        LAKARAM CRACKERS
+                      </h2>
+                    </div>
+                    <p className="text-xs text-slate-300 print:text-gray-700 font-medium mt-0.5">
+                      Direct Sivakasi Cracker Factory Outlets • 100% Green Certified
+                    </p>
+                    <p className="text-[11px] text-slate-400 print:text-gray-600">
+                      Sivakasi, Tamil Nadu - 626123 • Helpline: +91 9442188990 • www.lakaramcreckers.com
+                    </p>
+                  </div>
+
+                  <div className="sm:text-right bg-[#161a29] p-3 rounded-2xl border border-slate-800 print:bg-white print:border-gray-300 print:p-2">
+                    <span className="text-[10px] text-amber-400 uppercase font-bold tracking-wider block print:text-black">
+                      TAX INVOICE / ESTIMATE BILL
+                    </span>
+                    <span className="font-mono font-bold text-white text-base block print:text-black">
+                      {selectedOrderForInvoice.orderId}
+                    </span>
+                    <span className="text-[11px] text-slate-400 print:text-gray-600 block">
+                      Date: {new Date(selectedOrderForInvoice.orderDate || Date.now()).toLocaleDateString('en-IN', {
+                        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                      })}
+                    </span>
+                    <span className="text-[11px] text-emerald-400 font-semibold print:text-green-800 block">
+                      Status: {(selectedOrderForInvoice.status || 'PENDING').toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Customer & Delivery Information Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#161a29] p-4 rounded-2xl border border-slate-800 text-xs print:bg-gray-50 print:border-gray-200">
+                  <div>
+                    <span className="text-[10px] text-amber-400 uppercase font-bold tracking-wider block mb-1 print:text-black">
+                      Customer Details (Bill To)
+                    </span>
+                    <p className="font-bold text-white text-sm print:text-black">{selectedOrderForInvoice.customerName}</p>
+                    <p className="text-slate-300 flex items-center gap-1 mt-0.5 print:text-gray-700">
+                      <Phone className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{selectedOrderForInvoice.phone}</span>
+                    </p>
+                    <p className="text-slate-400 text-[11px] mt-1 print:text-gray-600">
+                      Payment Mode: <strong className="text-white print:text-black">{selectedOrderForInvoice.paymentMethod || 'WhatsApp / Cash'}</strong>
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-amber-400 uppercase font-bold tracking-wider block mb-1 print:text-black">
+                      Delivery Destination (Ship To)
+                    </span>
+                    <p className="text-slate-200 font-medium print:text-black">
+                      {selectedOrderForInvoice.deliveryAddress || 'Direct Sivakasi Warehouse Pickup'}
+                    </p>
+                    <p className="text-slate-400 print:text-gray-600 mt-0.5">
+                      Pincode: <strong className="text-white print:text-black">{selectedOrderForInvoice.pincode || 'N/A'}</strong>
+                    </p>
+                    <p className="text-slate-400 text-[11px] mt-1 flex items-center gap-1 print:text-gray-600">
+                      <Truck className="w-3.5 h-3.5 text-amber-400 print:text-black" />
+                      <span>{selectedOrderForInvoice.estimatedDelivery || '3 to 5 business days via Sivakasi Transport Hub'}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Ordered Items Table */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 print:text-black">
+                      Ordered Products ({selectedOrderForInvoice.items?.length || selectedOrderForInvoice.totalItemCount || 0} items)
+                    </h4>
+                  </div>
+                  <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#161a29] print:bg-white print:border-gray-300">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#0f121e] text-slate-300 text-[10px] uppercase font-bold border-b border-slate-800 print:bg-gray-100 print:text-gray-800 print:border-gray-300">
+                        <tr>
+                          <th className="py-2.5 px-3 text-center w-12">#</th>
+                          <th className="py-2.5 px-3">Product Name</th>
+                          <th className="py-2.5 px-3 text-center">Pack Size</th>
+                          <th className="py-2.5 px-3 text-right">Price (₹)</th>
+                          <th className="py-2.5 px-3 text-center">Qty</th>
+                          <th className="py-2.5 px-3 text-right">Total (₹)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80 print:divide-gray-200">
+                        {(selectedOrderForInvoice.items && selectedOrderForInvoice.items.length > 0
+                          ? selectedOrderForInvoice.items
+                          : [
+                              {
+                                productName: 'Assorted Cracker Package',
+                                packSize: 'Standard Box',
+                                price: (selectedOrderForInvoice.subtotal || selectedOrderForInvoice.grandTotal || 0) / (selectedOrderForInvoice.totalItemCount || 1),
+                                quantity: selectedOrderForInvoice.totalItemCount || 1,
+                                subtotal: selectedOrderForInvoice.subtotal || selectedOrderForInvoice.grandTotal || 0
+                              }
+                            ]
+                        ).map((item, iIdx) => (
+                          <tr key={iIdx} className="text-slate-200 print:text-black">
+                            <td className="py-2.5 px-3 text-center font-mono text-slate-400 print:text-gray-600">
+                              {iIdx + 1}
+                            </td>
+                            <td className="py-2.5 px-3 font-medium">
+                              <span className="text-white font-semibold block print:text-black">{item.productName}</span>
+                              {item.category && (
+                                <span className="text-[10px] text-slate-400 capitalize print:text-gray-500">{item.category}</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 text-center text-slate-400 print:text-gray-600">
+                              {item.packSize || '1 Box'}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-mono">
+                              ₹{(parseFloat(item.price) || 0).toFixed(2)}
+                            </td>
+                            <td className="py-2.5 px-3 text-center font-bold text-amber-300 print:text-black">
+                              {item.quantity}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-bold font-mono text-white print:text-black">
+                              ₹{((parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1)).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Price Breakdown Calculation */}
+                <div className="bg-[#181c2d] p-4 rounded-2xl border border-slate-800 space-y-2 text-xs print:bg-gray-50 print:border-gray-200">
+                  <div className="flex justify-between text-slate-400 print:text-gray-600">
+                    <span>Total Actual MRP Value:</span>
+                    <span className="line-through">
+                      ₹{(selectedOrderForInvoice.actualValue || (selectedOrderForInvoice.subtotal || 0) * 5).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-emerald-400 font-semibold print:text-green-700">
+                    <span>Diwali Festive Mega Savings (80% Discount):</span>
+                    <span>
+                      - ₹{(selectedOrderForInvoice.festiveDiscount || ((selectedOrderForInvoice.subtotal || 0) * 4)).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-300 print:text-gray-600">
+                    <span>Subtotal:</span>
+                    <span className="font-mono font-semibold">
+                      ₹{(selectedOrderForInvoice.subtotal || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-400 print:text-gray-600">
+                    <span>Packing & Transport Forwarding:</span>
+                    <span>
+                      {selectedOrderForInvoice.packingAndForwarding === 0 || selectedOrderForInvoice.subtotal > 3000
+                        ? 'FREE'
+                        : `₹${(selectedOrderForInvoice.packingAndForwarding || 150).toFixed(2)}`}
+                    </span>
+                  </div>
+                  <div className="pt-2.5 border-t border-slate-700 flex justify-between items-baseline font-black print:border-gray-300">
+                    <span className="text-sm text-white print:text-black">Net Total Payable:</span>
+                    <span className="text-2xl text-amber-400 font-mono print:text-black">
+                      ₹{(selectedOrderForInvoice.grandTotal || selectedOrderForInvoice.subtotal || 0).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Invoice Footer / Legal note */}
+                <div className="text-[10px] text-slate-400 border-t border-slate-800 pt-3 flex flex-col sm:flex-row justify-between gap-2 print:border-gray-300 print:text-gray-600">
+                  <p>Thank you for choosing Lakaram Crackers Sivakasi! Wishing you a safe and joyful Diwali celebration.</p>
+                  <p className="font-mono text-slate-500 print:text-gray-500">Authorized Signature • Computer Generated Invoice</p>
+                </div>
+              </div>
+
+              {/* Modal Bottom Action Controls (hidden on print) */}
+              <div className="bg-[#0f121e] p-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 print:hidden">
+                <div className="flex items-center gap-2">
+                  {/* Contextual Action Button */}
+                  {(() => {
+                    const cfg = getStatusConfig(selectedOrderForInvoice.status);
+                    if (!cfg.nextStatus) return null;
+                    return (
+                      <button
+                        disabled={updatingOrderId === selectedOrderForInvoice.orderId}
+                        onClick={() => handleUpdateOrderStatus(selectedOrderForInvoice.orderId, cfg.nextStatus)}
+                        className={`text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all ${
+                          cfg.nextStatus === 'ACCEPTED'
+                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950'
+                            : cfg.nextStatus === 'PACKED'
+                            ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-950'
+                            : 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-950'
+                        }`}
+                      >
+                        {updatingOrderId === selectedOrderForInvoice.orderId ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Check className="w-4 h-4" />
+                        )}
+                        <span>{cfg.nextLabel}</span>
+                      </button>
+                    );
+                  })()}
+
+                  {/* Customer WhatsApp Notification button */}
+                  {selectedOrderForInvoice.phone && (
+                    <a
+                      href={`https://wa.me/91${selectedOrderForInvoice.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                        `🎆 *LAKARAM CRACKERS ORDER UPDATE* 🎆\n\nDear ${selectedOrderForInvoice.customerName},\nYour Order ID: *${selectedOrderForInvoice.orderId}* status is now: *${(selectedOrderForInvoice.status || 'PENDING').toUpperCase()}*!\n\n⭐️ Total: ₹${(selectedOrderForInvoice.grandTotal || selectedOrderForInvoice.subtotal || 0).toFixed(2)}\n🚚 Estimated Delivery: 3 to 5 business days via Sivakasi Transport Hub.\n\nThank you for choosing Lakaram Crackers! 🙏`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs px-3.5 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-semibold flex items-center gap-1.5 border border-emerald-500/40 transition-colors"
+                    >
+                      <MessageCircle className="w-4 h-4 text-emerald-400" />
+                      <span>Notify Customer</span>
+                    </a>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="text-xs px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold flex items-center gap-1.5 transition-colors border border-slate-700"
+                  >
+                    <Printer className="w-4 h-4 text-amber-400" />
+                    <span>Print Invoice</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedOrderForInvoice(null)}
+                    className="text-xs px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+
+            </div>
           </div>
         )}
       </main>

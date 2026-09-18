@@ -412,7 +412,7 @@ apiApp.post('/api/orders', async (req, res) => {
       packingCharges,
       grandTotal,
       '3 to 5 business days via Sivakasi Heavy Transport',
-      'CONFIRMED',
+      'PENDING',
       whatsappShareUrl
     ]);
 
@@ -439,7 +439,7 @@ apiApp.post('/api/orders', async (req, res) => {
 
     res.status(201).json({
       orderId,
-      status: 'CONFIRMED',
+      status: 'PENDING',
       orderDate: new Date().toISOString(),
       customerName: orderData.customerName,
       phone: orderData.phone,
@@ -459,6 +459,123 @@ apiApp.post('/api/orders', async (req, res) => {
   } catch (err) {
     console.error('Error in POST /api/orders:', err);
     res.status(500).json({ error: 'Failed to save order in database', details: err.message });
+  }
+});
+
+// PATCH update order status
+apiApp.patch('/api/orders/:orderId/status', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    if (!status || !status.trim()) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    const cleanStatus = status.trim().toUpperCase();
+    const updateRes = await pool.query(
+      'UPDATE customer_orders SET status = $1 WHERE order_id = $2 RETURNING *',
+      [cleanStatus, orderId]
+    );
+
+    if (updateRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const ord = updateRes.rows[0];
+
+    // Fetch items for this order
+    const itemsResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [orderId]);
+    const items = itemsResult.rows.map(item => ({
+      productId: item.product_id,
+      productName: item.product_name,
+      category: item.category,
+      packSize: item.pack_size,
+      price: parseFloat(item.price),
+      quantity: parseInt(item.quantity),
+      subtotal: parseFloat(item.subtotal)
+    }));
+
+    console.log(`[Neon DB] Updated status for order ${orderId} to ${cleanStatus}`);
+
+    res.json({
+      orderId: ord.order_id,
+      customerName: ord.customer_name,
+      phone: ord.phone,
+      deliveryAddress: ord.delivery_address,
+      pincode: ord.pincode,
+      paymentMethod: ord.payment_method,
+      totalItemCount: parseInt(ord.total_item_count) || 0,
+      actualValue: parseFloat(ord.actual_value) || 0,
+      festiveDiscount: parseFloat(ord.festive_discount) || 0,
+      subtotal: parseFloat(ord.subtotal) || 0,
+      packingAndForwarding: parseFloat(ord.packing_and_forwarding) || 0,
+      grandTotal: parseFloat(ord.grand_total) || 0,
+      estimatedDelivery: ord.estimated_delivery,
+      status: ord.status,
+      orderDate: ord.order_date,
+      whatsappShareUrl: ord.whatsapp_share_url,
+      items
+    });
+  } catch (err) {
+    console.error('Error in PATCH /api/orders/:orderId/status:', err);
+    res.status(500).json({ error: 'Failed to update order status', details: err.message });
+  }
+});
+
+// PUT update order status alias
+apiApp.put('/api/orders/:orderId/status', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    if (!status || !status.trim()) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    const cleanStatus = status.trim().toUpperCase();
+    const updateRes = await pool.query(
+      'UPDATE customer_orders SET status = $1 WHERE order_id = $2 RETURNING *',
+      [cleanStatus, orderId]
+    );
+
+    if (updateRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const ord = updateRes.rows[0];
+
+    const itemsResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [orderId]);
+    const items = itemsResult.rows.map(item => ({
+      productId: item.product_id,
+      productName: item.product_name,
+      category: item.category,
+      packSize: item.pack_size,
+      price: parseFloat(item.price),
+      quantity: parseInt(item.quantity),
+      subtotal: parseFloat(item.subtotal)
+    }));
+
+    res.json({
+      orderId: ord.order_id,
+      customerName: ord.customer_name,
+      phone: ord.phone,
+      deliveryAddress: ord.delivery_address,
+      pincode: ord.pincode,
+      paymentMethod: ord.payment_method,
+      totalItemCount: parseInt(ord.total_item_count) || 0,
+      actualValue: parseFloat(ord.actual_value) || 0,
+      festiveDiscount: parseFloat(ord.festive_discount) || 0,
+      subtotal: parseFloat(ord.subtotal) || 0,
+      packingAndForwarding: parseFloat(ord.packing_and_forwarding) || 0,
+      grandTotal: parseFloat(ord.grand_total) || 0,
+      estimatedDelivery: ord.estimated_delivery,
+      status: ord.status,
+      orderDate: ord.order_date,
+      whatsappShareUrl: ord.whatsapp_share_url,
+      items
+    });
+  } catch (err) {
+    console.error('Error in PUT /api/orders/:orderId/status:', err);
+    res.status(500).json({ error: 'Failed to update order status', details: err.message });
   }
 });
 

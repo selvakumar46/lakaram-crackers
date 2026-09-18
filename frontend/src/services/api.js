@@ -219,7 +219,7 @@ export const submitOrder = async (orderPayload) => {
 
     const orderRes = {
       orderId,
-      status: 'CONFIRMED',
+      status: 'PENDING',
       orderDate: new Date().toISOString(),
       customerName: orderPayload.customerName,
       phone: orderPayload.phone,
@@ -239,6 +239,45 @@ export const submitOrder = async (orderPayload) => {
 
     saveOrderLocally(orderRes);
     return orderRes;
+  }
+};
+
+export const updateOrderStatus = async (orderId, status) => {
+  const cleanStatus = status.trim().toUpperCase();
+
+  // 1. Update local storage for instant UI responsiveness & offline resiliency
+  try {
+    const list = JSON.parse(localStorage.getItem('sparklefest_orders_history') || '[]');
+    const idx = list.findIndex(o => o.orderId === orderId);
+    if (idx >= 0) {
+      list[idx].status = cleanStatus;
+      localStorage.setItem('sparklefest_orders_history', JSON.stringify(list));
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  // 2. Call live API endpoint (Neon PostgreSQL or Spring Boot)
+  try {
+    const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: cleanStatus })
+    });
+    if (!res.ok) {
+      // Try PUT fallback if PATCH not accepted
+      const putRes = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: cleanStatus })
+      });
+      if (!putRes.ok) throw new Error(`HTTP ${putRes.status}`);
+      return await putRes.json();
+    }
+    return await res.json();
+  } catch (err) {
+    console.warn('[API] Saved status update locally, backend sync deferred:', err.message);
+    return { orderId, status: cleanStatus };
   }
 };
 

@@ -83,9 +83,6 @@ export default function Navbar() {
                   Sivakasi
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium tracking-wide">
-                www.lakaramcreckers.com • Direct Factory Outlet
-              </p>
             </div>
           </div>
 
