@@ -15,6 +15,7 @@ import {
 import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
 import { submitOrder } from '../services/api';
+import { lookupPincode } from '../services/pincodeLookup';
 
 export default function CheckoutModal() {
   const {
@@ -44,11 +45,38 @@ export default function CheckoutModal() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isLookingUpPin, setIsLookingUpPin] = useState(false);
+  const [pinLookupSuccess, setPinLookupSuccess] = useState('');
 
   if (!isCheckoutOpen) return null;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePincodeChange = async (e) => {
+    const pin = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setFormData(prev => ({ ...prev, pincode: pin }));
+    setPinLookupSuccess('');
+
+    if (pin.length === 6) {
+      setIsLookingUpPin(true);
+      try {
+        const result = await lookupPincode(pin);
+        if (result && result.city && result.state) {
+          setFormData(prev => ({
+            ...prev,
+            city: result.city,
+            state: result.state
+          }));
+          setPinLookupSuccess(`Auto-filled: ${result.city}, ${result.state}`);
+        }
+      } catch (err) {
+        console.warn('Pincode lookup failed:', err);
+      } finally {
+        setIsLookingUpPin(false);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -87,6 +115,16 @@ export default function CheckoutModal() {
       clearCart();
       setIsCheckoutOpen(false);
       setCompletedOrder(result);
+
+      // Automatically open WhatsApp to Admin (+91 9442188990) with the complete invoice!
+      if (result?.whatsappShareUrl) {
+        // Direct automatic window open or location redirect
+        const waWindow = window.open(result.whatsappShareUrl, '_blank');
+        if (!waWindow || waWindow.closed || typeof waWindow.closed === 'undefined') {
+          // If popup blocker blocked the new tab, redirect smoothly
+          window.location.href = result.whatsappShareUrl;
+        }
+      }
     } catch (err) {
       setErrorMsg('Failed to create order. Please check connection.');
     } finally {
@@ -231,20 +269,29 @@ export default function CheckoutModal() {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-slate-300 mb-1 font-medium">
-                    Pincode <span className="text-red-400">*</span>
+                  <label className="block text-xs text-slate-300 mb-1 font-medium flex items-center justify-between">
+                    <span>Pincode <span className="text-red-400">*</span></span>
+                    {isLookingUpPin && <Loader2 className="w-3 h-3 text-amber-400 animate-spin" />}
                   </label>
                   <input
                     type="text"
                     name="pincode"
                     required
+                    maxLength={6}
                     value={formData.pincode}
-                    onChange={handleChange}
+                    onChange={handlePincodeChange}
                     placeholder="600001"
                     className="w-full bg-[#181c2d] border border-slate-700 rounded-xl py-2 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
                   />
                 </div>
               </div>
+
+              {pinLookupSuccess && (
+                <div className="text-[11px] text-emerald-400 font-medium flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1.5 rounded-lg">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                  <span>{pinLookupSuccess}</span>
+                </div>
+              )}
             </div>
 
             {/* Order Payment & Summary */}
@@ -318,7 +365,7 @@ export default function CheckoutModal() {
                 </div>
                 <div className="flex justify-between text-slate-400">
                   <span>Packing & Transport:</span>
-                  <span>{packingCharges === 0 ? 'FREE' : `₹${packingCharges.toFixed(0)}`}</span>
+                  <span className="text-slate-200 font-semibold">₹{packingCharges.toFixed(0)}</span>
                 </div>
                 <div className="pt-2 border-t border-slate-700/80 flex justify-between items-baseline font-black">
                   <span className="text-sm text-white">Final Payable Amount:</span>
@@ -338,16 +385,17 @@ export default function CheckoutModal() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 hover:opacity-95 text-slate-950 font-black text-sm shadow-xl flex items-center justify-center gap-2 transition-all"
+              className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-amber-500 to-emerald-500 hover:opacity-95 text-slate-950 font-black text-sm shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing Order...</span>
+                  <span>Submitting & Sending Invoice...</span>
                 </>
               ) : (
                 <>
-                  <span>Place Order & Generate Invoice</span>
+                  <MessageCircle className="w-4 h-4 text-slate-950 fill-current" />
+                  <span>Confirm Order & Send Invoice to WhatsApp</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

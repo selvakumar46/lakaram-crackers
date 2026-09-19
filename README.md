@@ -16,7 +16,6 @@ Tailored specifically for Sivakasi fireworks retail and bulk buyers, featuring d
 - **Flat 75% Festive Discount**: Authentic Sivakasi direct factory pricing.
 - **Milestone Rewards Progress**:
   - Minimum order tracking (₹1,000 threshold for transport dispatch).
-  - Free packing & surprise gift unlock (at ₹3,000 threshold).
 - **Interactive Fireworks Celebrations**: Interactive festive fireworks cannon using canvas particle effects.
 
 ### 3. Smart Checkout & Invoicing

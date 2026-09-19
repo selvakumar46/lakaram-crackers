@@ -359,7 +359,7 @@ apiApp.post('/api/orders', async (req, res) => {
 
     const actualValue = subtotal * 5; // 80% savings
     const festiveDiscount = actualValue - subtotal;
-    const packingCharges = subtotal > 3000 ? 0 : 150;
+    const packingCharges = 150;
     const grandTotal = subtotal + packingCharges;
 
     // Build WhatsApp message URL
@@ -614,11 +614,20 @@ async function ensureDatabaseInitialized() {
         UPDATE products 
         SET discount_percent = 80,
             discounted_price = ROUND(original_price * 0.20)
-        WHERE discount_percent != 80 OR discounted_price != ROUND(original_price * 0.20)
+        WHERE category != 'gift-boxes' 
+          AND (discount_percent != 80 OR discounted_price != ROUND(original_price * 0.20))
       `);
       if (updated.rowCount > 0) {
         console.log(`[Neon DB] Updated ${updated.rowCount} products to 80% discount!`);
       }
+
+      // Ensure Gift Boxes retain 0% discount and their exact net rate
+      await pool.query(`
+        UPDATE products
+        SET discount_percent = 0,
+            discounted_price = original_price
+        WHERE category = 'gift-boxes' AND discount_percent != 0
+      `);
     }
   } catch (err) {
     console.error('[Neon DB] Initialization check error:', err.message);

@@ -189,7 +189,7 @@ export const submitOrder = async (orderPayload) => {
     const subtotal = orderPayload.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const actualValue = subtotal * 5;
     const festiveDiscount = actualValue - subtotal;
-    const packingAndForwarding = subtotal > 3000 ? 0 : 150;
+    const packingAndForwarding = 150;
     const grandTotal = subtotal + packingAndForwarding;
     const totalItemCount = orderPayload.items.reduce((acc, item) => acc + item.quantity, 0);
 

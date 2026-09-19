@@ -1,9 +1,10 @@
-import React from 'react';
-import { Plus, Minus, Heart, ShieldCheck, Volume2, Star, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Minus, Heart, ShieldCheck, Volume2, Star, Check, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export default function ProductCard({ product }) {
   const { cart, addToCart, wishlist, toggleWishlist } = useCart();
+  const [imgError, setImgError] = useState(false);
   const cartItem = cart[product.id];
   const quantity = cartItem ? cartItem.quantity : 0;
   const isWishlisted = wishlist.includes(product.id);
@@ -21,14 +22,25 @@ export default function ProductCard({ product }) {
   return (
     <div className="festive-glass-card rounded-2xl overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:-translate-y-1">
       {/* Image & Badges Container */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-900">
-        <img 
-          src={product.image} 
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f121e] via-transparent to-transparent opacity-80" />
+      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#121625] via-[#1a1f35] to-[#101320] flex items-center justify-center">
+        {product.image && !imgError ? (
+          <img 
+            src={product.image} 
+            alt={product.name}
+            onError={() => setImgError(true)}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center p-3">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-1.5 group-hover:scale-110 transition-transform">
+              <Sparkles className="w-6 h-6 animate-pulse" />
+            </div>
+            <span className="text-[10px] font-mono font-bold text-amber-300/80">{product.id}</span>
+            <span className="text-[11px] font-bold text-slate-300 line-clamp-1">{product.name}</span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0f121e] via-transparent to-transparent opacity-80 pointer-events-none" />
 
         {/* Discount Badge */}
         <div className="absolute top-2.5 left-2.5 bg-red-600 text-white font-extrabold text-[11px] px-2 py-0.5 rounded-lg shadow-md flex items-center gap-1">

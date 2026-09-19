@@ -121,8 +121,9 @@ export default function AdminDashboard({ onClose }) {
     const s = (status || 'PENDING').toUpperCase();
     switch (s) {
       case 'PENDING':
+      case 'CONFIRMED':
         return {
-          label: 'PENDING',
+          label: s === 'CONFIRMED' ? 'CONFIRMED' : 'PENDING',
           badgeClass: 'bg-amber-950/90 text-amber-300 border border-amber-500/40',
           dotClass: 'bg-amber-400 animate-pulse',
           icon: Clock,
@@ -902,11 +903,17 @@ export default function AdminDashboard({ onClose }) {
                       filteredProducts.map(prod => (
                         <tr key={prod.id} className="hover:bg-slate-800/20 transition-colors">
                           <td className="py-2.5 px-3">
-                            <img
-                              src={prod.image}
-                              alt={prod.name}
-                              className="w-10 h-10 rounded-lg object-cover bg-slate-900 border border-slate-800"
-                            />
+                            {prod.image ? (
+                              <img
+                                src={prod.image}
+                                alt={prod.name}
+                                className="w-10 h-10 rounded-lg object-cover bg-slate-900 border border-slate-800"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-[#181c2d] border border-slate-700/60 flex items-center justify-center text-amber-400">
+                                <Sparkles className="w-4 h-4" />
+                              </div>
+                            )}
                           </td>
                           <td className="py-2.5 px-3 font-mono font-bold text-amber-300">
                             {prod.id}
@@ -1065,17 +1072,39 @@ export default function AdminDashboard({ onClose }) {
                         {/* Card Middle Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-300">
                           <div>
-                            <span className="text-[10px] text-slate-500 block uppercase font-bold">Customer</span>
-                            <span className="font-semibold text-white block">{ord.customerName}</span>
-                            <span className="text-slate-400 flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3 text-slate-500" />
-                              {ord.phone}
-                            </span>
+                            <span className="text-[10px] text-slate-500 block uppercase font-bold">Customer Details</span>
+                            <span className="font-semibold text-white text-sm block">{ord.customerName}</span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <a
+                                href={`tel:${ord.phone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-slate-300 hover:text-amber-400 flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-700/60"
+                              >
+                                <Phone className="w-3 h-3 text-emerald-400" />
+                                <span>{ord.phone}</span>
+                              </a>
+                              {ord.phone && (
+                                <a
+                                  href={`https://wa.me/91${ord.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Vanakkam ${ord.customerName}, regarding your Lakaram Crackers Order #${ord.orderId}`)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-950/50 hover:bg-emerald-900/60 px-2 py-0.5 rounded-lg border border-emerald-500/40"
+                                >
+                                  <MessageCircle className="w-3 h-3" />
+                                  <span>WhatsApp</span>
+                                </a>
+                              )}
+                            </div>
                           </div>
                           <div>
                             <span className="text-[10px] text-slate-500 block uppercase font-bold">Delivery Address</span>
-                            <span className="text-slate-300 truncate block">{ord.deliveryAddress || 'Direct Pickup / Sivakasi'}</span>
-                            {ord.pincode && <span className="text-slate-400 text-[11px]">PIN: {ord.pincode}</span>}
+                            <span className="text-slate-200 block font-medium">{ord.deliveryAddress || 'Direct Pickup / Sivakasi'}</span>
+                            {ord.pincode && (
+                              <span className="text-amber-400/90 text-[11px] font-mono block mt-0.5">
+                                PIN: {ord.pincode}
+                              </span>
+                            )}
                           </div>
                           <div>
                             <span className="text-[10px] text-slate-500 block uppercase font-bold">Items Ordered</span>
@@ -1088,21 +1117,57 @@ export default function AdminDashboard({ onClose }) {
                           </div>
                         </div>
 
+                        {/* Items preview pill tags if items exist */}
+                        {ord.items && ord.items.length > 0 && (
+                          <div className="bg-[#0e1220] rounded-xl p-2.5 border border-slate-800/80">
+                            <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1.5">
+                              Items Preview ({ord.items.length}):
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {ord.items.slice(0, 4).map((it, itIdx) => (
+                                <span
+                                  key={itIdx}
+                                  className="text-[11px] bg-[#161a29] border border-slate-700/60 text-slate-300 px-2 py-0.5 rounded-md flex items-center gap-1"
+                                >
+                                  <span className="font-semibold text-white">{it.productName || it.name}</span>
+                                  <span className="text-amber-400 font-mono">x{it.quantity}</span>
+                                </span>
+                              ))}
+                              {ord.items.length > 4 && (
+                                <span className="text-[11px] bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-md font-medium">
+                                  +{ord.items.length - 4} more items
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
                         {/* Card Bottom Actions Row */}
                         <div
                           className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/60"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="flex items-center gap-2">
-                            {/* Quick Next Lifecycle Action */}
-                            {statusCfg.nextStatus && (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {/* Explicit Prominent Accept Order button for PENDING or CONFIRMED orders */}
+                            {((ord.status || 'PENDING').toUpperCase() === 'PENDING' || (ord.status || 'PENDING').toUpperCase() === 'CONFIRMED') ? (
+                              <button
+                                disabled={isUpdating}
+                                onClick={(e) => handleUpdateOrderStatus(ord.orderId, 'ACCEPTED', e)}
+                                className="text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-900/30 hover:shadow-emerald-900/50 transition-all cursor-pointer"
+                              >
+                                {isUpdating ? (
+                                  <RefreshCw className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Check className="w-4 h-4 text-white" />
+                                )}
+                                <span>Accept Order</span>
+                              </button>
+                            ) : statusCfg.nextStatus ? (
                               <button
                                 disabled={isUpdating}
                                 onClick={(e) => handleUpdateOrderStatus(ord.orderId, statusCfg.nextStatus, e)}
-                                className={`text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all shadow-sm ${
-                                  statusCfg.nextStatus === 'ACCEPTED'
-                                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                                    : statusCfg.nextStatus === 'PACKED'
+                                className={`text-xs px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all shadow-sm ${
+                                  statusCfg.nextStatus === 'PACKED'
                                     ? 'bg-purple-600 hover:bg-purple-500 text-white'
                                     : 'bg-sky-600 hover:bg-sky-500 text-white'
                                 }`}
@@ -1114,7 +1179,7 @@ export default function AdminDashboard({ onClose }) {
                                 )}
                                 <span>{statusCfg.nextLabel}</span>
                               </button>
-                            )}
+                            ) : null}
 
                             {/* Status Changer Dropdown */}
                             <select
@@ -1124,6 +1189,7 @@ export default function AdminDashboard({ onClose }) {
                               className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500"
                             >
                               <option value="PENDING">Pending</option>
+                              <option value="CONFIRMED">Confirmed</option>
                               <option value="ACCEPTED">Accepted</option>
                               <option value="PACKED">Packed</option>
                               <option value="DISPATCHED">Dispatched</option>
@@ -1132,13 +1198,13 @@ export default function AdminDashboard({ onClose }) {
                             </select>
                           </div>
 
-                          {/* View Invoice Button */}
+                          {/* Dedicated View Invoice & Items Button */}
                           <button
                             onClick={() => setSelectedOrderForInvoice(ord)}
-                            className="text-xs px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 font-semibold flex items-center gap-1.5 transition-colors border border-slate-700"
+                            className="text-xs px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold flex items-center gap-1.5 transition-colors shadow-sm shadow-amber-500/20 cursor-pointer"
                           >
-                            <FileText className="w-3.5 h-3.5" />
-                            <span>View Invoice</span>
+                            <FileText className="w-4 h-4 text-slate-950" />
+                            <span>View Invoice & Items</span>
                             <ChevronRight className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -1410,9 +1476,7 @@ export default function AdminDashboard({ onClose }) {
                   <div className="flex justify-between text-slate-400 print:text-gray-600">
                     <span>Packing & Transport Forwarding:</span>
                     <span>
-                      {selectedOrderForInvoice.packingAndForwarding === 0 || selectedOrderForInvoice.subtotal > 3000
-                        ? 'FREE'
-                        : `₹${(selectedOrderForInvoice.packingAndForwarding || 150).toFixed(2)}`}
+                      ₹{(selectedOrderForInvoice.packingAndForwarding || 150).toFixed(2)}
                     </span>
                   </div>
                   <div className="pt-2.5 border-t border-slate-700 flex justify-between items-baseline font-black print:border-gray-300">

@@ -128,7 +128,7 @@ export default function OrderSuccessModal() {
             </div>
             <div className="flex justify-between text-slate-400 print:text-gray-600">
               <span>Packing & Transport:</span>
-              <span>{completedOrder.packingAndForwarding === 0 ? 'FREE' : `₹${completedOrder.packingAndForwarding.toFixed(2)}`}</span>
+              <span className="font-semibold text-white print:text-black">₹{(parseFloat(completedOrder.packingAndForwarding) || 150).toFixed(2)}</span>
             </div>
             <div className="pt-2 border-t border-slate-700 flex justify-between items-baseline font-black print:border-gray-300">
               <span className="text-sm text-white print:text-black">Net Total Payable:</span>
