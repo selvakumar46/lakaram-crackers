@@ -903,11 +903,17 @@ export default function AdminDashboard({ onClose }) {
                       filteredProducts.map(prod => (
                         <tr key={prod.id} className="hover:bg-slate-800/20 transition-colors">
                           <td className="py-2.5 px-3">
-                            <img
-                              src={prod.image}
-                              alt={prod.name}
-                              className="w-10 h-10 rounded-lg object-cover bg-slate-900 border border-slate-800"
-                            />
+                            {prod.image ? (
+                              <img
+                                src={prod.image}
+                                alt={prod.name}
+                                className="w-10 h-10 rounded-lg object-cover bg-slate-900 border border-slate-800"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-[#181c2d] border border-slate-700/60 flex items-center justify-center text-amber-400">
+                                <Sparkles className="w-4 h-4" />
+                              </div>
+                            )}
                           </td>
                           <td className="py-2.5 px-3 font-mono font-bold text-amber-300">
                             {prod.id}
