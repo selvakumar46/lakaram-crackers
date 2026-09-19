@@ -116,7 +116,7 @@ export default function CheckoutModal() {
       setIsCheckoutOpen(false);
       setCompletedOrder(result);
 
-      // Automatically open WhatsApp to Admin (+91 9442188990) with the complete invoice!
+      // Automatically open WhatsApp to Admin (+91 89730 15070) with the complete invoice!
       if (result?.whatsappShareUrl) {
         // Direct automatic window open or location redirect
         const waWindow = window.open(result.whatsappShareUrl, '_blank');

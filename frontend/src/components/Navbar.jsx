@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   Sparkles, 
   ShoppingBag, 
@@ -7,13 +7,11 @@ import {
   LayoutGrid, 
   Search, 
   PhoneCall, 
-  Server,
   Zap,
   X,
   Settings
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { checkBackendHealth } from '../services/api';
 
 export default function Navbar() {
   const { 
@@ -27,16 +25,6 @@ export default function Navbar() {
     searchQuery,
     setSearchQuery
   } = useCart();
-
-  const [backendConnected, setBackendConnected] = useState(false);
-
-  useEffect(() => {
-    checkBackendHealth().then(status => setBackendConnected(status));
-    const interval = setInterval(() => {
-      checkBackendHealth().then(status => setBackendConnected(status));
-    }, 15000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <header className="sticky top-0 z-40 w-full">
@@ -53,15 +41,9 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-4 text-xs font-semibold">
-          <div className="flex items-center gap-1.5 bg-black/20 px-2 py-0.5 rounded-full">
-            <Server className={`w-3 h-3 ${backendConnected ? 'text-emerald-400' : 'text-amber-300'}`} />
-            <span className={backendConnected ? 'text-emerald-300' : 'text-amber-200'}>
-              {backendConnected ? 'Java 17/25 API Active' : 'Standalone / Local DB'}
-            </span>
-          </div>
-          <a href="tel:+919442188990" className="flex items-center gap-1 hover:text-white transition-colors">
+          <a href="tel:+918973015070" className="flex items-center gap-1 hover:text-white transition-colors">
             <PhoneCall className="w-3 h-3 text-amber-300" />
-            +91 94421 88990
+            +91 89730 15070
           </a>
         </div>
       </div>
