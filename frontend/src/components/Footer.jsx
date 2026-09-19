@@ -94,7 +94,7 @@ export default function Footer() {
             <div className="space-y-2 text-[11px]">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                <span>45/2B, Sattur Road, Fireworks Industrial Zone, Sivakasi - 626123, Tamil Nadu, India.</span>
+                <span>Sivakasi to Vembakottai Main Road, Madathupatti, Sivakasi - 626 131, Tamil Nadu, India.</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-amber-400 flex-shrink-0" />
