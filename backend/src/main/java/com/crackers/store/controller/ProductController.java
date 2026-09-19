@@ -24,7 +24,7 @@ public class ProductController {
     public ResponseEntity<Map<String, Object>> health() {
         return ResponseEntity.ok(Map.of(
             "status", "UP",
-            "service", "Lakaram Crackers Java Backend (www.lakaramcreckers.com)",
+            "service", "Lakaram Crackers Java Backend (lakaram-crackers.onrender.com)",
             "version", "1.0.0",
             "productsCount", productService.getAllProducts().size()
         ));

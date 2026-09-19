@@ -1337,7 +1337,7 @@ export default function AdminDashboard({ onClose }) {
                       Direct Sivakasi Cracker Factory Outlets • 100% Green Certified
                     </p>
                     <p className="text-[11px] text-slate-400 print:text-gray-600">
-                      Sivakasi to Vembakottai Main Road, Madathupatti, Sivakasi - 626 131 • Helpline: +91 89730 15070 • www.lakaramcreckers.com
+                      Sivakasi to Vembakottai Main Road, Madathupatti, Sivakasi - 626 131 • Helpline: +91 89730 15070 • lakaram-crackers.onrender.com
                     </p>
                   </div>
 

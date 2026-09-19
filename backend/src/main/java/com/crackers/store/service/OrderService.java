@@ -99,7 +99,7 @@ public class OrderService {
     private String formatWhatsAppMessage(OrderResponse order) {
         StringBuilder sb = new StringBuilder();
         sb.append("🎇 *LAKARAM CRACKERS - NEW ORDER* 🎇\n");
-        sb.append("🌐 www.lakaramcreckers.com\n");
+        sb.append("🌐 lakaram-crackers.onrender.com\n");
         sb.append("--------------------------------------\n");
         sb.append("🆔 *Order ID:* ").append(order.getOrderId()).append("\n");
         sb.append("📅 *Date:* ").append(order.getOrderDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))).append("\n");

@@ -20,7 +20,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-slate-400 leading-relaxed text-[11px]">
-              Direct manufacturing outlet delivering 100% genuine Sivakasi fireworks at factory wholesale rates via www.lakaramcreckers.com. Certified Green Crackers with nationwide transport network.
+              Direct manufacturing outlet delivering 100% genuine Sivakasi fireworks at factory wholesale rates via lakaram-crackers.onrender.com. Certified Green Crackers with nationwide transport network.
             </p>
             <div className="flex items-center gap-2 pt-1 text-emerald-400 text-[11px] font-semibold">
               <ShieldCheck className="w-4 h-4" />
@@ -114,7 +114,7 @@ export default function Footer() {
             <strong>Legal & Safety Notice:</strong> Fireworks are sold strictly in accordance with the Explosives Act of India and PESO guidelines. We only manufacture and deliver CSIR-NEERI certified Green Crackers that comply with the Hon'ble Supreme Court of India standards on decibel limits and chemical restrictions. Orders are dispatched via licensed logistics partners.
           </p>
           <div className="flex flex-col sm:flex-row justify-between items-center pt-2 text-slate-500">
-            <span>© 2026 Lakaram Crackers (www.lakaramcreckers.com). All Rights Reserved.</span>
+            <span>© 2026 Lakaram Crackers (lakaram-crackers.onrender.com). All Rights Reserved.</span>
             <span className="mt-1 sm:mt-0">Powered by ReactJS & Java Spring Boot API</span>
           </div>
         </div>

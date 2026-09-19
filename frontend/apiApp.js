@@ -49,7 +49,7 @@ apiApp.get('/api/health', async (req, res) => {
     res.json({
       status: 'UP',
       database: 'Neon Serverless PostgreSQL (Connected)',
-      service: 'Lakaram Crackers API (www.lakaramcreckers.com)',
+      service: 'Lakaram Crackers API (lakaram-crackers.onrender.com)',
       version: '1.0.0',
       productsCount: count
     });
@@ -365,7 +365,7 @@ apiApp.post('/api/orders', async (req, res) => {
     // Build WhatsApp message URL
     const STORE_WHATSAPP_NUMBER = '918973015070';
     let msg = `🎇 *LAKARAM CRACKERS - NEW ORDER* 🎇\n`;
-    msg += `🌐 www.lakaramcreckers.com\n`;
+    msg += `🌐 lakaram-crackers.onrender.com\n`;
     msg += `--------------------------------------\n`;
     msg += `🆔 *Order ID:* ${orderId}\n`;
     msg += `👤 *Customer:* ${orderData.customerName || 'Customer'}\n`;
