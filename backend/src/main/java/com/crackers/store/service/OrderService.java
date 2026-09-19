@@ -17,7 +17,7 @@ public class OrderService {
 
     private final ProductService productService;
     private final OrderRepository orderRepository;
-    private static final String STORE_WHATSAPP_NUMBER = "919442188990"; // Standard Sivakasi shop direct line format
+    private static final String STORE_WHATSAPP_NUMBER = "918973015070"; // Standard Sivakasi shop direct line format
 
     public OrderService(ProductService productService, OrderRepository orderRepository) {
         this.productService = productService;

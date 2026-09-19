@@ -193,7 +193,7 @@ export const submitOrder = async (orderPayload) => {
     const grandTotal = subtotal + packingAndForwarding;
     const totalItemCount = orderPayload.items.reduce((acc, item) => acc + item.quantity, 0);
 
-    const storeNumber = '919442188990';
+    const storeNumber = '918973015070';
     let msg = `🎇 *LAKARAM CRACKERS - NEW ORDER* 🎇\n`;
     msg += `🌐 www.lakaramcreckers.com\n`;
     msg += `--------------------------------------\n`;

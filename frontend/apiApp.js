@@ -363,7 +363,7 @@ apiApp.post('/api/orders', async (req, res) => {
     const grandTotal = subtotal + packingCharges;
 
     // Build WhatsApp message URL
-    const STORE_WHATSAPP_NUMBER = '919442188990';
+    const STORE_WHATSAPP_NUMBER = '918973015070';
     let msg = `🎇 *LAKARAM CRACKERS - NEW ORDER* 🎇\n`;
     msg += `🌐 www.lakaramcreckers.com\n`;
     msg += `--------------------------------------\n`;

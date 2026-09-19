@@ -59,9 +59,9 @@ export default function Navbar() {
               {backendConnected ? 'Java 17/25 API Active' : 'Standalone / Local DB'}
             </span>
           </div>
-          <a href="tel:+919442188990" className="flex items-center gap-1 hover:text-white transition-colors">
+          <a href="tel:+918973015070" className="flex items-center gap-1 hover:text-white transition-colors">
             <PhoneCall className="w-3 h-3 text-amber-300" />
-            +91 94421 88990
+            +91 89730 15070
           </a>
         </div>
       </div>

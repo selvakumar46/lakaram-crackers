@@ -1337,7 +1337,7 @@ export default function AdminDashboard({ onClose }) {
                       Direct Sivakasi Cracker Factory Outlets • 100% Green Certified
                     </p>
                     <p className="text-[11px] text-slate-400 print:text-gray-600">
-                      Sivakasi, Tamil Nadu - 626123 • Helpline: +91 9442188990 • www.lakaramcreckers.com
+                      Sivakasi, Tamil Nadu - 626123 • Helpline: +91 89730 15070 • www.lakaramcreckers.com
                     </p>
                   </div>
 
