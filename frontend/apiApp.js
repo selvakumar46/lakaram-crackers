@@ -20,6 +20,11 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+// Prevent unhandled error crashes when Neon Serverless drops idle connections
+pool.on('error', (err) => {
+  console.error('[Neon PostgreSQL Pool Warning (Auto-reconnected)]:', err.message);
+});
+
 // Helper: map DB snake_case row to frontend camelCase object
 const mapProductRow = (row) => ({
   id: row.id,

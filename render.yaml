@@ -6,6 +6,7 @@ services:
     rootDir: frontend
     buildCommand: npm install && npm run build
     startCommand: npm start
+    healthCheckPath: /healthz
     envVars:
       - key: PORT
         value: 10000
