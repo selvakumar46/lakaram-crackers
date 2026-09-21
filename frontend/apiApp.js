@@ -7,9 +7,9 @@ const { Pool } = pkg;
 
 const apiApp = express();
 
-// Enable CORS and generous limit for base64 cracker images
+// Enable CORS and reasonable limit for API payloads
 apiApp.use(cors());
-apiApp.use(express.json({ limit: '25mb' }));
+apiApp.use(express.json({ limit: '2mb' }));
 
 // In-Memory Fallback Cache (Ensures store never returns 500 even if Neon DB exceeds quota)
 let inMemoryProductsCache = [...DEFAULT_PRODUCTS];
@@ -214,10 +214,16 @@ apiApp.get('/api/products/:id', async (req, res) => {
   }
 });
 
-// POST create new product directly into Neon PostgreSQL
+// POST create new product directly into CockroachDB PostgreSQL
 apiApp.post('/api/products', async (req, res) => {
   try {
     const p = req.body;
+
+    // Strict image size restriction on server (Max 200 KB)
+    if (p.image && p.image.length > 250 * 1024) {
+      return res.status(400).json({ error: 'Image payload is too large. Images must be under 200 KB.' });
+    }
+
     const id = p.id || `LKM-${Math.floor(100 + Math.random() * 900)}`;
     const originalPrice = parseFloat(p.originalPrice) || 0;
     const discountPercent = parseInt(p.discountPercent) || 80;
@@ -269,19 +275,25 @@ apiApp.post('/api/products', async (req, res) => {
     ];
 
     const result = await pool.query(query, values);
-    console.log(`[Neon DB] Inserted/Updated product: ${id} (${p.name})`);
+    console.log(`[CockroachDB] Inserted/Updated product: ${id} (${p.name})`);
     res.status(201).json(mapProductRow(result.rows[0]));
   } catch (err) {
     console.error('Error in POST /api/products:', err);
-    res.status(500).json({ error: 'Failed to save product in Neon database', details: err.message });
+    res.status(500).json({ error: 'Failed to save product in database', details: err.message });
   }
 });
 
-// PUT update product in Neon PostgreSQL
+// PUT update product in CockroachDB PostgreSQL
 apiApp.put('/api/products/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const p = req.body;
+
+    // Strict image size restriction on server (Max 200 KB)
+    if (p.image && p.image.length > 250 * 1024) {
+      return res.status(400).json({ error: 'Image payload is too large. Images must be under 200 KB.' });
+    }
+
     const originalPrice = parseFloat(p.originalPrice) || 0;
     const discountPercent = parseInt(p.discountPercent) || 80;
     const discountedPrice = p.discountedPrice !== undefined 

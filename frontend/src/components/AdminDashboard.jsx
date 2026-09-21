@@ -228,13 +228,24 @@ export default function AdminDashboard({ onClose }) {
     setAuthError('');
   };
 
-  // Image Upload handler (with automatic client-side compression to stay under 60KB)
+  // Maximum allowed raw upload size: 5 MB
+  const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
+  // Image Upload handler (with strict 5MB size limit and automatic client-side compression to stay under 60KB)
   const handleImageFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file (JPG, PNG, WEBP).');
+      e.target.value = '';
+      return;
+    }
+
+    // Strict upload file size restriction: Maximum 5 MB
+    if (file.size > MAX_UPLOAD_BYTES) {
+      alert(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum allowed upload size is 5 MB.`);
+      e.target.value = '';
       return;
     }
 
@@ -264,7 +275,15 @@ export default function AdminDashboard({ onClose }) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+        let quality = 0.75;
+        let compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+
+        // If compressed image is still over 100KB, re-encode with tighter quality
+        if (compressedBase64.length > 100 * 1024) {
+          quality = 0.6;
+          compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        }
+
         setImagePreview(compressedBase64);
         setFormData(prev => ({ ...prev, image: compressedBase64 }));
       };
@@ -779,7 +798,7 @@ export default function AdminDashboard({ onClose }) {
                     <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-amber-400 rounded-2xl p-4 cursor-pointer bg-[#101320] transition-colors">
                       <Upload className="w-6 h-6 text-amber-400 mb-1" />
                       <span className="text-xs font-bold text-slate-200">Select Image File</span>
-                      <span className="text-[10px] text-slate-500 mt-0.5">PNG, JPG, WEBP (stored instantly)</span>
+                      <span className="text-[10px] text-amber-400/80 font-medium mt-0.5">Max 5 MB • Auto-compressed &lt; 60 KB</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -819,7 +838,14 @@ export default function AdminDashboard({ onClose }) {
                       className="w-16 h-16 rounded-xl object-cover bg-slate-900 border border-amber-400/40"
                     />
                     <div>
-                      <span className="text-xs font-bold text-white block">Image Ready</span>
+                      <span className="text-xs font-bold text-emerald-400 block flex items-center gap-1.5">
+                        <span>✓ Image Optimized</span>
+                        {imagePreview.startsWith('data:') && (
+                          <span className="text-[10px] text-slate-400 font-mono font-normal">
+                            (~{Math.round((imagePreview.length * 0.75) / 1024)} KB)
+                          </span>
+                        )}
+                      </span>
                       <button
                         type="button"
                         onClick={() => { setImagePreview(''); setFormData({ ...formData, image: '' }); }}
