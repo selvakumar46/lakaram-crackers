@@ -1,0 +1,11 @@
+{
+  "name": "lakaram-crackers",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "prestart": "cd frontend && npm run build",
+    "start": "cd frontend && node server.js"
+  }
+}
