@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowUpDown, Filter, SearchX } from 'lucide-react';
+import { Sparkles, ArrowUpDown, Filter, SearchX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import ProductCard from './ProductCard';
 import { useCart } from '../context/CartContext';
 import { fetchProducts } from '../services/api';
+
+const ITEMS_PER_PAGE = 30;
 
 export default function ProductGrid() {
   const { selectedCategory, searchQuery, setSearchQuery, catalogProducts } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('featured');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setLoading(true);
@@ -18,6 +21,11 @@ export default function ProductGrid() {
       })
       .finally(() => setLoading(false));
   }, [selectedCategory, searchQuery, catalogProducts]);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, sortBy]);
 
   // Sort logic
   const sortedProducts = [...products].sort((a, b) => {
@@ -30,19 +38,35 @@ export default function ProductGrid() {
     return 0; // featured default
   });
 
+  // Pagination calculation
+  const totalItems = sortedProducts.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+  const paginatedProducts = sortedProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    const elem = document.getElementById('products-catalog-section');
+    if (elem) {
+      elem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section id="products-catalog-section" className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-20">
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
             <span>Browse Products</span>
             <span className="text-xs bg-slate-800 text-amber-300 font-semibold px-2 py-0.5 rounded-full">
-              {products.length} Items Available
+              {totalItems} Items Available
             </span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            All prices include flat 80% festival discount directly from Sivakasi factory.
+            Showing {totalItems > 0 ? `${startIndex + 1}–${endIndex}` : '0'} of {totalItems} crackers • Page {currentPage} of {totalPages}
           </p>
         </div>
 
@@ -85,12 +109,82 @@ export default function ProductGrid() {
           </button>
         </div>
       ) : (
-        /* Products Grid */
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
-          {sortedProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          {/* Products Grid - 30 items per page */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
+            {paginatedProducts.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-10 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs text-slate-400 font-medium">
+                Showing <span className="text-amber-400 font-bold">{startIndex + 1}</span> to{' '}
+                <span className="text-amber-400 font-bold">{endIndex}</span> of{' '}
+                <span className="text-white font-bold">{totalItems}</span> products (30 per page)
+              </div>
+
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                {/* First page button */}
+                <button
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg bg-[#141828] border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                  title="First Page"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+
+                {/* Previous button */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-lg bg-[#141828] border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Prev</span>
+                </button>
+
+                {/* Page numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                      currentPage === page
+                        ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 scale-105'
+                        : 'bg-[#141828] text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                {/* Next button */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg bg-[#141828] border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Last page button */}
+                <button
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg bg-[#141828] border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                  title="Last Page"
+                >
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
