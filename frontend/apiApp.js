@@ -15,10 +15,10 @@ apiApp.use(express.json({ limit: '25mb' }));
 let inMemoryProductsCache = [...DEFAULT_PRODUCTS];
 let inMemoryCategoriesCache = [...CATEGORIES];
 
-// Neon Serverless PostgreSQL Database Connection
+// CockroachDB Serverless PostgreSQL Database Connection
 const DATABASE_URL = process.env.DATABASE_URL || 
   process.env.SPRING_DATASOURCE_URL || 
-  'postgresql://neondb_owner:npg_SzMhVg42oPKi@ep-sweet-bonus-azmv80s3-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+  'postgresql://lakaram:4sOukdWZ2e1jX7aUUeCyNg@lakaram-crackers-34301.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full';
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
@@ -28,9 +28,9 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Prevent unhandled error crashes when Neon Serverless drops idle connections
+// Prevent unhandled error crashes when CockroachDB Serverless drops idle connections
 pool.on('error', (err) => {
-  console.error('[Neon PostgreSQL Pool Warning (Auto-reconnected)]:', err.message);
+  console.error('[CockroachDB Pool Warning (Auto-reconnected)]:', err.message);
 });
 
 // Helper: map DB snake_case row to frontend camelCase object
@@ -61,16 +61,16 @@ apiApp.get('/api/health', async (req, res) => {
     const count = parseInt(result.rows[0].count) || 0;
     res.json({
       status: 'UP',
-      database: 'Neon Serverless PostgreSQL (Connected)',
+      database: 'CockroachDB Serverless PostgreSQL (Connected)',
       service: 'Lakaram Crackers API (lakaram-crackers.onrender.com)',
       version: '1.0.0',
       productsCount: count
     });
   } catch (err) {
-    console.warn('[Neon DB Health Warning - Using In-Memory Fallback]:', err.message);
+    console.warn('[CockroachDB Health Warning - Using In-Memory Fallback]:', err.message);
     res.json({
       status: 'UP',
-      database: `Degraded (Neon DB: ${err.message})`,
+      database: `Degraded (CockroachDB: ${err.message})`,
       service: 'Lakaram Crackers API (lakaram-crackers.onrender.com)',
       version: '1.0.0',
       productsCount: inMemoryProductsCache.length
