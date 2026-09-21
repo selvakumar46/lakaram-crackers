@@ -17,6 +17,9 @@ const DATABASE_URL = process.env.DATABASE_URL ||
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
+  max: 5,
+  idleTimeoutMillis: 15000,
+  connectionTimeoutMillis: 5000,
   ssl: { rejectUnauthorized: false }
 });
 
@@ -638,7 +641,8 @@ async function ensureDatabaseInitialized() {
     console.error('[Neon DB] Initialization check error:', err.message);
   }
 }
-ensureDatabaseInitialized();
+// Database initialization can be triggered manually if needed
+// ensureDatabaseInitialized();
 
 export default apiApp;
 
