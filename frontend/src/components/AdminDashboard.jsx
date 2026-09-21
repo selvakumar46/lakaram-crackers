@@ -228,7 +228,7 @@ export default function AdminDashboard({ onClose }) {
     setAuthError('');
   };
 
-  // Image Upload handler (supports local file upload via FileReader base64)
+  // Image Upload handler (with automatic client-side compression to stay under 60KB)
   const handleImageFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -239,10 +239,36 @@ export default function AdminDashboard({ onClose }) {
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result;
-      setImagePreview(base64String);
-      setFormData(prev => ({ ...prev, image: base64String }));
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+        setImagePreview(compressedBase64);
+        setFormData(prev => ({ ...prev, image: compressedBase64 }));
+      };
+      img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   };

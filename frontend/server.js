@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -8,6 +9,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+// Enable gzip / deflate response compression for all responses
+app.use(compression());
+
 // Default to Render's default port 10000 if not specified
 const PORT = parseInt(process.env.PORT) || 10000;
 
