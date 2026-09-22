@@ -29,18 +29,19 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full">
       {/* Festive top notification banner */}
-      <div className="bg-gradient-to-r from-red-700 via-amber-600 to-red-700 text-amber-100 text-xs py-1.5 px-4 font-medium flex items-center justify-between shadow-inner">
+      <div className="bg-gradient-to-r from-red-700 via-amber-600 to-red-700 text-amber-100 text-xs py-1.5 px-3 sm:px-4 font-medium flex items-center justify-between shadow-inner">
         <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
-          <span className="flex h-2 w-2 relative">
+          <span className="flex h-2 w-2 relative flex-shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
           </span>
-          <p className="truncate">
-            ✨ <strong>Diwali Mega Discount:</strong> Flat 80% Off Directly from Sivakasi Factory • 100% Eco-Friendly Green Crackers
+          <p className="text-[11px] sm:text-xs truncate">
+            <span className="sm:hidden">✨ <strong>Diwali 80% Off:</strong> Direct Sivakasi Factory Rates</span>
+            <span className="hidden sm:inline">✨ <strong>Diwali Mega Discount:</strong> Flat 80% Off Directly from Sivakasi Factory • 100% Eco-Friendly Green Crackers</span>
           </p>
         </div>
 
-        <div className="hidden md:flex items-center gap-4 text-xs font-semibold">
+        <div className="hidden md:flex items-center gap-4 text-xs font-semibold flex-shrink-0">
           <a href="tel:+918973015070" className="flex items-center gap-1 hover:text-white transition-colors">
             <PhoneCall className="w-3 h-3 text-amber-300" />
             +91 89730 15070
@@ -49,19 +50,19 @@ export default function Navbar() {
       </div>
 
       {/* Main Navbar */}
-      <nav className="bg-[#0f121e]/95 backdrop-blur-md border-b border-amber-500/20 px-4 lg:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <nav className="bg-[#0f121e]/95 backdrop-blur-md border-b border-amber-500/20 px-2.5 sm:px-6 lg:px-8 py-2 sm:py-3.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl crimson-gradient-bg flex items-center justify-center shadow-lg shadow-red-500/25 border border-amber-400/30">
-              <Sparkles className="w-6 h-6 text-amber-300 animate-sparkle" />
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl crimson-gradient-bg flex items-center justify-center shadow-lg shadow-red-500/25 border border-amber-400/30 flex-shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-amber-300 animate-sparkle" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold tracking-tight gold-gradient-text font-serif">
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <span className="text-base sm:text-xl font-bold tracking-tight gold-gradient-text font-serif whitespace-nowrap">
                   Lakaram Crackers
                 </span>
-                <span className="text-xs bg-red-600/80 text-white font-black px-1.5 py-0.5 rounded tracking-wider uppercase">
+                <span className="text-[9px] sm:text-xs bg-red-600/80 text-white font-black px-1 sm:px-1.5 py-0.5 rounded tracking-wider uppercase">
                   Sivakasi
                 </span>
               </div>
@@ -91,12 +92,12 @@ export default function Navbar() {
           </div>
 
           {/* Action buttons & mode toggle */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
             {/* View Mode Toggle (Visual Catalog vs Sivakasi Order Sheet) */}
-            <div className="flex bg-[#161a29] p-1 rounded-xl border border-slate-800 shadow-inner">
+            <div className="flex bg-[#161a29] p-0.5 sm:p-1 rounded-xl border border-slate-800 shadow-inner">
               <button
                 onClick={() => setViewMode('catalog')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   viewMode === 'catalog'
                     ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
                     : 'text-slate-400 hover:text-slate-200'
@@ -109,7 +110,7 @@ export default function Navbar() {
 
               <button
                 onClick={() => setViewMode('quick-order')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   viewMode === 'quick-order'
                     ? 'bg-red-600 text-white shadow-md shadow-red-600/30'
                     : 'text-slate-400 hover:text-slate-200'
@@ -133,7 +134,7 @@ export default function Navbar() {
             {/* Admin Console Button */}
             <button
               onClick={() => setIsAdminOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 bg-amber-950/40 border border-amber-500/30 hover:bg-amber-900/40 transition-colors"
+              className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold text-amber-300 bg-amber-950/40 border border-amber-500/30 hover:bg-amber-900/40 transition-colors flex items-center gap-1.5"
               title="Store Admin Console (Add Products, Stock, Orders)"
             >
               <Settings className="w-3.5 h-3.5 text-amber-400" />
@@ -143,15 +144,15 @@ export default function Navbar() {
             {/* Cart Trigger */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-3.5 sm:px-4 py-2 rounded-xl text-sm transition-all shadow-lg shadow-amber-500/20 active:scale-95"
+              className="relative flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-amber-500/20 active:scale-95 flex-shrink-0"
             >
-              <ShoppingBag className="w-4 h-4" />
+              <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <div className="hidden sm:flex flex-col text-left leading-none">
                 <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">Cart</span>
                 <span className="text-xs font-extrabold">₹{subtotal.toFixed(0)}</span>
               </div>
               {totalItemCount > 0 && (
-                <span className="bg-red-600 text-white text-[11px] font-black rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center shadow-md animate-bounce">
+                <span className="bg-red-600 text-white text-[10px] sm:text-[11px] font-black rounded-full h-4.5 min-w-4.5 sm:h-5 sm:min-w-5 px-1 flex items-center justify-center shadow-md animate-bounce">
                   {totalItemCount}
                 </span>
               )}

@@ -55,25 +55,27 @@ export default function ProductGrid() {
   };
 
   return (
-    <section id="products-catalog-section" className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-20">
+    <section id="products-catalog-section" className="py-6 sm:py-8 px-2.5 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-20">
       {/* Header controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-5 pb-3.5 border-b border-slate-800">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
             <span>Browse Products</span>
             <span className="text-xs bg-slate-800 text-amber-300 font-semibold px-2 py-0.5 rounded-full">
-              {totalItems} Items Available
+              {totalItems} Items
             </span>
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
             Showing {totalItems > 0 ? `${startIndex + 1}–${endIndex}` : '0'} of {totalItems} crackers • Page {currentPage} of {totalPages}
           </p>
         </div>
 
         {/* Sort selector */}
-        <div className="flex items-center gap-2">
-          <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-xs text-slate-400 font-medium">Sort by:</span>
+        <div className="flex items-center justify-between sm:justify-start gap-2">
+          <div className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
+            <ArrowUpDown className="w-3.5 h-3.5" />
+            <span>Sort:</span>
+          </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -89,7 +91,7 @@ export default function ProductGrid() {
 
       {/* Loading state */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 animate-pulse">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6 animate-pulse">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="festive-glass-card rounded-2xl h-80 bg-slate-800/40" />
           ))}
@@ -111,7 +113,7 @@ export default function ProductGrid() {
       ) : (
         <>
           {/* Products Grid - 30 items per page */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6">
             {paginatedProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -119,32 +121,31 @@ export default function ProductGrid() {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="mt-10 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-xs text-slate-400 font-medium">
-                Showing <span className="text-amber-400 font-bold">{startIndex + 1}</span> to{' '}
-                <span className="text-amber-400 font-bold">{endIndex}</span> of{' '}
-                <span className="text-white font-bold">{totalItems}</span> products (30 per page)
+            <div className="mt-8 pt-5 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+              <div className="text-[11px] sm:text-xs text-slate-400 font-medium text-center sm:text-left">
+                Page <span className="text-amber-400 font-bold">{currentPage}</span> of{' '}
+                <span className="text-white font-bold">{totalPages}</span> ({totalItems} total products)
               </div>
 
               <div className="flex items-center gap-1 sm:gap-1.5">
-                {/* First page button */}
+                {/* First page button - hidden on small mobile */}
                 <button
                   onClick={() => handlePageChange(1)}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-lg bg-[#141828] border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                  className="hidden sm:flex p-1.5 sm:p-2 rounded-lg bg-[#141828] border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all items-center justify-center"
                   title="First Page"
                 >
-                  <ChevronsLeft className="w-4 h-4" />
+                  <ChevronsLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
 
                 {/* Previous button */}
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-lg bg-[#141828] border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
+                  className="px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#141828] border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
-                  <span>Prev</span>
+                  <span className="hidden sm:inline">Prev</span>
                 </button>
 
                 {/* Page numbers */}
@@ -152,7 +153,7 @@ export default function ProductGrid() {
                   <button
                     key={page}
                     onClick={() => handlePageChange(page)}
-                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-bold transition-all ${
                       currentPage === page
                         ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 scale-105'
                         : 'bg-[#141828] text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
@@ -166,20 +167,20 @@ export default function ProductGrid() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 rounded-lg bg-[#141828] border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
+                  className="px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#141828] border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
                 >
-                  <span>Next</span>
+                  <span className="hidden sm:inline">Next</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
 
-                {/* Last page button */}
+                {/* Last page button - hidden on small mobile */}
                 <button
                   onClick={() => handlePageChange(totalPages)}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-lg bg-[#141828] border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                  className="hidden sm:flex p-1.5 sm:p-2 rounded-lg bg-[#141828] border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all items-center justify-center"
                   title="Last Page"
                 >
-                  <ChevronsRight className="w-4 h-4" />
+                  <ChevronsRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
               </div>
             </div>

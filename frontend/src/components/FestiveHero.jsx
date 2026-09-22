@@ -26,7 +26,7 @@ export default function FestiveHero() {
   };
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-[#151928] via-[#0f121e] to-[#0c0e17] py-12 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+    <div className="relative overflow-hidden bg-gradient-to-b from-[#151928] via-[#0f121e] to-[#0c0e17] py-8 sm:py-12 px-3 sm:px-6 lg:px-8 border-b border-slate-800">
       {/* Decorative ambient background lights */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -34,27 +34,27 @@ export default function FestiveHero() {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center max-w-3xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold mb-5 shadow-sm">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold mb-4 sm:mb-5 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
             <span>Diwali 2026 Festival Booking Open</span>
             <span className="bg-red-600 text-white text-[10px] px-2 py-0.2 rounded-full font-bold">80% OFF</span>
           </div>
 
           {/* Heading */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight font-serif">
+          <h1 className="text-2xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-3 sm:mb-4 leading-tight font-serif">
             Celebrate with Genuine <br />
             <span className="gold-gradient-text">Sivakasi Fireworks</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-300 mb-8 max-w-2xl mx-auto font-light leading-relaxed">
+          <p className="text-xs sm:text-lg text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto font-light leading-relaxed">
             Order premium certified green crackers directly from Sivakasi manufacturing hubs. Transparent wholesale rates, flat festival discounts, and safe doorstep delivery.
           </p>
 
           {/* Call to action buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-4 mb-8 sm:mb-10 w-full max-w-md mx-auto">
             <button
               onClick={() => setViewMode('quick-order')}
-              className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-red-600/30 text-sm transition-all transform hover:-translate-y-0.5"
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-lg shadow-red-600/30 text-xs sm:text-sm transition-all transform active:scale-95 sm:hover:-translate-y-0.5"
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Open Bulk Price List Order Form</span>
@@ -62,7 +62,7 @@ export default function FestiveHero() {
 
             <button
               onClick={triggerCelebration}
-              className="flex items-center gap-2 bg-[#1b2033] hover:bg-[#252b45] text-amber-300 border border-amber-500/30 font-semibold px-5 py-3 rounded-xl text-sm transition-all shadow-md"
+              className="flex items-center justify-center gap-2 bg-[#1b2033] hover:bg-[#252b45] text-amber-300 border border-amber-500/30 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-md active:scale-95"
             >
               <PartyPopper className="w-4 h-4 text-amber-400" />
               <span>Sparkle Fireworks!</span>
@@ -70,8 +70,8 @@ export default function FestiveHero() {
           </div>
 
           {/* Feature Highlights Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto gap-3 sm:gap-4 text-left">
-            <div className="festive-glass p-3.5 rounded-xl border border-slate-800/80">
+          <div className="grid grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto gap-2.5 sm:gap-4 text-left">
+            <div className="festive-glass p-3 sm:p-3.5 rounded-xl border border-slate-800/80">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="p-1.5 rounded-lg bg-red-500/10 text-red-400">
                   <Sparkles className="w-4 h-4" />

@@ -43,7 +43,7 @@ export default function CartDrawer() {
       />
 
       {/* Drawer Container */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
         <div className="w-screen max-w-md bg-[#0f121e] border-l border-amber-500/20 shadow-2xl flex flex-col">
           {/* Header */}
           <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-[#151928]">
