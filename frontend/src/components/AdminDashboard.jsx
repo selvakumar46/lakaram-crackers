@@ -228,10 +228,10 @@ export default function AdminDashboard({ onClose }) {
     setAuthError('');
   };
 
-  // Maximum allowed raw upload size: 5 MB
-  const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+  // Maximum allowed raw upload size: 2 MB
+  const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 
-  // Image Upload handler (with strict 5MB size limit and automatic client-side compression to stay under 60KB)
+  // Image Upload handler (with strict 2MB size limit and automatic client-side compression to stay under 60KB)
   const handleImageFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -242,9 +242,9 @@ export default function AdminDashboard({ onClose }) {
       return;
     }
 
-    // Strict upload file size restriction: Maximum 5 MB
+    // Strict upload file size restriction: Maximum 2 MB
     if (file.size > MAX_UPLOAD_BYTES) {
-      alert(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum allowed upload size is 5 MB.`);
+      alert(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum allowed upload size is 2 MB.`);
       e.target.value = '';
       return;
     }
@@ -798,7 +798,7 @@ export default function AdminDashboard({ onClose }) {
                     <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-amber-400 rounded-2xl p-4 cursor-pointer bg-[#101320] transition-colors">
                       <Upload className="w-6 h-6 text-amber-400 mb-1" />
                       <span className="text-xs font-bold text-slate-200">Select Image File</span>
-                      <span className="text-[10px] text-amber-400/80 font-medium mt-0.5">Max 5 MB • Auto-compressed &lt; 60 KB</span>
+                      <span className="text-[10px] text-amber-400/80 font-medium mt-0.5">Max 2 MB • Auto-compressed &lt; 60 KB</span>
                       <input
                         type="file"
                         accept="image/*"
