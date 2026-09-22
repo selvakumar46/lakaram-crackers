@@ -1,5 +1,5 @@
 services:
-  # 1. Full-Stack Application (React Frontend + Neon PostgreSQL Server)
+  # 1. Full-Stack Application (React Frontend + CockroachDB PostgreSQL Server)
   - type: web
     name: lakaram-crackers-frontend
     runtime: node
@@ -10,8 +10,12 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=384
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
-        value: postgresql://neondb_owner:npg_SzMhVg42oPKi@ep-sweet-bonus-azmv80s3-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+        value: postgresql://lakaram:4sOukdWZ2e1jX7aUUeCyNg@lakaram-crackers-34301.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full
 
   # 2. Java Spring Boot Backend Service (Optional API)
   - type: web
@@ -24,9 +28,9 @@ services:
       - key: PORT
         value: 10000
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://ep-sweet-bonus-azmv80s3-pooler.c-3.ap-southeast-1.aws.neon.tech:5432/neondb?sslmode=require
+        value: jdbc:postgresql://lakaram-crackers-34301.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full
       - key: SPRING_DATASOURCE_USERNAME
-        value: neondb_owner
+        value: lakaram
       - key: SPRING_DATASOURCE_PASSWORD
-        value: npg_SzMhVg42oPKi
+        value: 4sOukdWZ2e1jX7aUUeCyNg
     plan: free

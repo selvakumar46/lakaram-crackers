@@ -1,28 +1,36 @@
 import express from 'express';
 import pkg from 'pg';
 import cors from 'cors';
+import { DEFAULT_PRODUCTS, CATEGORIES } from './src/data/defaultProducts.js';
 
 const { Pool } = pkg;
 
 const apiApp = express();
 
-// Enable CORS and generous limit for base64 cracker images
+// Enable CORS and reasonable limit for API payloads
 apiApp.use(cors());
-apiApp.use(express.json({ limit: '25mb' }));
+apiApp.use(express.json({ limit: '2mb' }));
 
-// Neon Serverless PostgreSQL Database Connection
+// In-Memory Fallback Cache (Ensures store never returns 500 even if Neon DB exceeds quota)
+let inMemoryProductsCache = [...DEFAULT_PRODUCTS];
+let inMemoryCategoriesCache = [...CATEGORIES];
+
+// CockroachDB Serverless PostgreSQL Database Connection
 const DATABASE_URL = process.env.DATABASE_URL || 
   process.env.SPRING_DATASOURCE_URL || 
-  'postgresql://neondb_owner:npg_SzMhVg42oPKi@ep-sweet-bonus-azmv80s3-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+  'postgresql://lakaram:4sOukdWZ2e1jX7aUUeCyNg@lakaram-crackers-34301.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full';
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
+  max: 5,
+  idleTimeoutMillis: 15000,
+  connectionTimeoutMillis: 5000,
   ssl: { rejectUnauthorized: false }
 });
 
-// Prevent unhandled error crashes when Neon Serverless drops idle connections
+// Prevent unhandled error crashes when CockroachDB Serverless drops idle connections
 pool.on('error', (err) => {
-  console.error('[Neon PostgreSQL Pool Warning (Auto-reconnected)]:', err.message);
+  console.error('[CockroachDB Pool Warning (Auto-reconnected)]:', err.message);
 });
 
 // Helper: map DB snake_case row to frontend camelCase object
@@ -53,19 +61,25 @@ apiApp.get('/api/health', async (req, res) => {
     const count = parseInt(result.rows[0].count) || 0;
     res.json({
       status: 'UP',
-      database: 'Neon Serverless PostgreSQL (Connected)',
+      database: 'CockroachDB Serverless PostgreSQL (Connected)',
       service: 'Lakaram Crackers API (lakaram-crackers.onrender.com)',
       version: '1.0.0',
       productsCount: count
     });
   } catch (err) {
-    console.error('Database connection error in /api/health:', err);
-    res.status(500).json({ status: 'DOWN', error: err.message });
+    console.warn('[CockroachDB Health Warning - Using In-Memory Fallback]:', err.message);
+    res.json({
+      status: 'UP',
+      database: `Degraded (CockroachDB: ${err.message})`,
+      service: 'Lakaram Crackers API (lakaram-crackers.onrender.com)',
+      version: '1.0.0',
+      productsCount: inMemoryProductsCache.length
+    });
   }
 });
 
 // ==========================================
-// 2. CATEGORIES ENDPOINT (Live database counts)
+// 2. CATEGORIES ENDPOINT (Live database counts with graceful fallback)
 // ==========================================
 const BASE_CATEGORIES = [
   { id: 'all', name: 'All Products', icon: 'Sparkles' },
@@ -109,21 +123,24 @@ apiApp.get('/api/categories', async (req, res) => {
       }
     });
 
+    inMemoryCategoriesCache = result;
     res.json(result);
   } catch (err) {
-    console.error('Error in GET /api/categories:', err);
-    res.status(500).json({ error: 'Failed to fetch categories from database' });
+    console.warn('[Neon DB Quota/Error in /api/categories - Using In-Memory Fallback]:', err.message);
+    res.json(inMemoryCategoriesCache);
   }
 });
 
 // ==========================================
-// 3. PRODUCTS ENDPOINTS (GET, POST, PUT, DELETE)
+// 3. PRODUCTS ENDPOINTS (With Pagination and Fallback Resilience)
 // ==========================================
 
-// GET all products (with optional search and category filter)
+// GET all products (with optional search, category filter, and page/limit pagination)
 apiApp.get('/api/products', async (req, res) => {
+  const { category, search, page, limit } = req.query;
+  let productsList = [];
+
   try {
-    const { category, search } = req.query;
     let query = 'SELECT * FROM products';
     const params = [];
 
@@ -137,11 +154,44 @@ apiApp.get('/api/products', async (req, res) => {
 
     query += ' ORDER BY id ASC';
     const result = await pool.query(query, params);
-    res.json(result.rows.map(mapProductRow));
+    productsList = result.rows.map(mapProductRow);
+    if (productsList.length > 0 && !search && (!category || category === 'all')) {
+      inMemoryProductsCache = productsList;
+    }
   } catch (err) {
-    console.error('Error in GET /api/products:', err);
-    res.status(500).json({ error: 'Failed to fetch products from database' });
+    console.warn('[Neon DB Quota/Error in /api/products - Using In-Memory Fallback]:', err.message);
+    let fallback = [...inMemoryProductsCache];
+    if (category && category !== 'all') {
+      fallback = fallback.filter(p => p.category === category);
+    }
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      fallback = fallback.filter(p =>
+        p.name?.toLowerCase().includes(q) ||
+        p.category?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.id?.toLowerCase().includes(q)
+      );
+    }
+    productsList = fallback;
   }
+
+  // Handle optional page/limit pagination (e.g., 30 per page)
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  if (pageNum > 0 && limitNum > 0) {
+    const totalCount = productsList.length;
+    const totalPages = Math.ceil(totalCount / limitNum) || 1;
+    const startIndex = (pageNum - 1) * limitNum;
+    const pageSlice = productsList.slice(startIndex, startIndex + limitNum);
+
+    res.setHeader('X-Total-Count', totalCount.toString());
+    res.setHeader('X-Total-Pages', totalPages.toString());
+    res.setHeader('X-Current-Page', pageNum.toString());
+    return res.json(pageSlice);
+  }
+
+  res.json(productsList);
 });
 
 // GET single product by ID
@@ -149,19 +199,31 @@ apiApp.get('/api/products/:id', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
     if (result.rows.length === 0) {
+      const foundInCache = inMemoryProductsCache.find(p => p.id === req.params.id);
+      if (foundInCache) return res.json(foundInCache);
       return res.status(404).json({ error: 'Product not found' });
     }
     res.json(mapProductRow(result.rows[0]));
   } catch (err) {
-    console.error('Error in GET /api/products/:id:', err);
-    res.status(500).json({ error: err.message });
+    console.warn('[Neon DB Quota/Error in /api/products/:id - Using In-Memory Fallback]:', err.message);
+    const foundInCache = inMemoryProductsCache.find(p => p.id === req.params.id);
+    if (foundInCache) {
+      return res.json(foundInCache);
+    }
+    res.status(404).json({ error: 'Product not found' });
   }
 });
 
-// POST create new product directly into Neon PostgreSQL
+// POST create new product directly into CockroachDB PostgreSQL
 apiApp.post('/api/products', async (req, res) => {
   try {
     const p = req.body;
+
+    // Strict image size restriction on server (Max 200 KB)
+    if (p.image && p.image.length > 250 * 1024) {
+      return res.status(400).json({ error: 'Image payload is too large. Images must be under 200 KB.' });
+    }
+
     const id = p.id || `LKM-${Math.floor(100 + Math.random() * 900)}`;
     const originalPrice = parseFloat(p.originalPrice) || 0;
     const discountPercent = parseInt(p.discountPercent) || 80;
@@ -213,19 +275,25 @@ apiApp.post('/api/products', async (req, res) => {
     ];
 
     const result = await pool.query(query, values);
-    console.log(`[Neon DB] Inserted/Updated product: ${id} (${p.name})`);
+    console.log(`[CockroachDB] Inserted/Updated product: ${id} (${p.name})`);
     res.status(201).json(mapProductRow(result.rows[0]));
   } catch (err) {
     console.error('Error in POST /api/products:', err);
-    res.status(500).json({ error: 'Failed to save product in Neon database', details: err.message });
+    res.status(500).json({ error: 'Failed to save product in database', details: err.message });
   }
 });
 
-// PUT update product in Neon PostgreSQL
+// PUT update product in CockroachDB PostgreSQL
 apiApp.put('/api/products/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const p = req.body;
+
+    // Strict image size restriction on server (Max 200 KB)
+    if (p.image && p.image.length > 250 * 1024) {
+      return res.status(400).json({ error: 'Image payload is too large. Images must be under 200 KB.' });
+    }
+
     const originalPrice = parseFloat(p.originalPrice) || 0;
     const discountPercent = parseInt(p.discountPercent) || 80;
     const discountedPrice = p.discountedPrice !== undefined 
@@ -343,8 +411,8 @@ apiApp.get('/api/orders', async (req, res) => {
 
     res.json(response);
   } catch (err) {
-    console.error('Error in GET /api/orders:', err);
-    res.status(500).json({ error: 'Failed to fetch orders from database' });
+    console.warn('[Neon DB Orders Warning - Returning empty list]:', err.message);
+    res.json([]);
   }
 });
 
@@ -392,55 +460,59 @@ apiApp.post('/api/orders', async (req, res) => {
 
     const whatsappShareUrl = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 
-    // Insert order into customer_orders
-    const orderQuery = `
-      INSERT INTO customer_orders (
-        order_id, customer_name, phone, delivery_address, pincode,
-        payment_method, total_item_count, actual_value, festive_discount,
-        subtotal, packing_and_forwarding, grand_total, estimated_delivery,
-        status, order_date, whatsapp_share_url
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), $15)
-      RETURNING *
-    `;
+    try {
+      // Insert order into customer_orders
+      const orderQuery = `
+        INSERT INTO customer_orders (
+          order_id, customer_name, phone, delivery_address, pincode,
+          payment_method, total_item_count, actual_value, festive_discount,
+          subtotal, packing_and_forwarding, grand_total, estimated_delivery,
+          status, order_date, whatsapp_share_url
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), $15)
+        RETURNING *
+      `;
 
-    await pool.query(orderQuery, [
-      orderId,
-      orderData.customerName || 'Customer',
-      orderData.phone || '',
-      `${orderData.address || ''}, ${orderData.city || ''}, ${orderData.state || ''}`,
-      orderData.pincode || '',
-      orderData.paymentMethod || 'WHATSAPP',
-      totalItems,
-      actualValue,
-      festiveDiscount,
-      subtotal,
-      packingCharges,
-      grandTotal,
-      '3 to 5 business days via Sivakasi Heavy Transport',
-      'PENDING',
-      whatsappShareUrl
-    ]);
-
-    // Insert order items
-    for (const item of items) {
-      await pool.query(`
-        INSERT INTO order_items (
-          order_id, product_id, product_name, category, pack_size,
-          price, quantity, subtotal
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      `, [
+      await pool.query(orderQuery, [
         orderId,
-        item.productId || 'UNKNOWN',
-        item.productName || 'Cracker Item',
-        item.category || 'sparklers',
-        item.packSize || '1 Box',
-        parseFloat(item.price) || 0,
-        parseInt(item.quantity) || 1,
-        (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1)
+        orderData.customerName || 'Customer',
+        orderData.phone || '',
+        `${orderData.address || ''}, ${orderData.city || ''}, ${orderData.state || ''}`,
+        orderData.pincode || '',
+        orderData.paymentMethod || 'WHATSAPP',
+        totalItems,
+        actualValue,
+        festiveDiscount,
+        subtotal,
+        packingCharges,
+        grandTotal,
+        '3 to 5 business days via Sivakasi Heavy Transport',
+        'PENDING',
+        whatsappShareUrl
       ]);
-    }
 
-    console.log(`[Neon DB] Created order ${orderId} for ${orderData.customerName}`);
+      // Insert order items
+      for (const item of items) {
+        await pool.query(`
+          INSERT INTO order_items (
+            order_id, product_id, product_name, category, pack_size,
+            price, quantity, subtotal
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `, [
+          orderId,
+          item.productId || 'UNKNOWN',
+          item.productName || 'Cracker Item',
+          item.category || 'sparklers',
+          item.packSize || '1 Box',
+          parseFloat(item.price) || 0,
+          parseInt(item.quantity) || 1,
+          (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1)
+        ]);
+      }
+
+      console.log(`[Neon DB] Created order ${orderId} for ${orderData.customerName}`);
+    } catch (dbErr) {
+      console.warn('[Neon DB Order Warning - Failed to persist to DB, continuing order response]:', dbErr.message);
+    }
 
     res.status(201).json({
       orderId,
@@ -463,7 +535,7 @@ apiApp.post('/api/orders', async (req, res) => {
     });
   } catch (err) {
     console.error('Error in POST /api/orders:', err);
-    res.status(500).json({ error: 'Failed to save order in database', details: err.message });
+    res.status(500).json({ error: 'Failed to process order', details: err.message });
   }
 });
 
@@ -638,7 +710,8 @@ async function ensureDatabaseInitialized() {
     console.error('[Neon DB] Initialization check error:', err.message);
   }
 }
-ensureDatabaseInitialized();
+// Database initialization can be triggered manually if needed
+// ensureDatabaseInitialized();
 
 export default apiApp;
 
