@@ -147,8 +147,8 @@ export const CartProvider = ({ children }) => {
   const festiveSavings = Math.max(0, actualTotal - subtotal);
   const minOrderThreshold = 1; // Acceptable order amount is ₹1 and above
   const isMinOrderMet = subtotal >= 1 || subtotal === 0;
-  const packingCharges = subtotal > 0 ? 150 : 0;
-  const grandTotal = subtotal + packingCharges;
+  const packingCharges = 0; // Removed packing and transport charges
+  const grandTotal = subtotal;
 
   return (
     <CartContext.Provider value={{

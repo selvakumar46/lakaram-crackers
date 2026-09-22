@@ -1525,12 +1525,14 @@ export default function AdminDashboard({ onClose }) {
                       ₹{(selectedOrderForInvoice.subtotal || 0).toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between text-slate-400 print:text-gray-600">
-                    <span>Packing & Transport Forwarding:</span>
-                    <span>
-                      ₹{(selectedOrderForInvoice.packingAndForwarding || 150).toFixed(2)}
-                    </span>
-                  </div>
+                  {parseFloat(selectedOrderForInvoice.packingAndForwarding) > 0 && (
+                    <div className="flex justify-between text-slate-400 print:text-gray-600">
+                      <span>Packing & Transport Forwarding:</span>
+                      <span>
+                        ₹{parseFloat(selectedOrderForInvoice.packingAndForwarding).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
                   <div className="pt-2.5 border-t border-slate-700 flex justify-between items-baseline font-black print:border-gray-300">
                     <span className="text-sm text-white print:text-black">Net Total Payable:</span>
                     <span className="text-2xl text-amber-400 font-mono print:text-black">

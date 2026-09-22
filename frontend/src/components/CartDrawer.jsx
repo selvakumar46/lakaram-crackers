@@ -148,10 +148,12 @@ export default function CartDrawer() {
                   <span>Subtotal:</span>
                   <span className="text-slate-200 font-semibold">₹{subtotal.toFixed(0)}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Packing & Transport:</span>
-                  <span className="text-slate-200 font-medium">₹{packingCharges.toFixed(0)}</span>
-                </div>
+                {packingCharges > 0 && (
+                  <div className="flex justify-between text-slate-400">
+                    <span>Packing & Transport:</span>
+                    <span className="text-slate-200 font-medium">₹{packingCharges.toFixed(0)}</span>
+                  </div>
+                )}
                 <div className="pt-2 border-t border-slate-800 flex justify-between items-baseline">
                   <span className="text-sm font-bold text-white">Net Total:</span>
                   <span className="text-lg font-black text-amber-400">

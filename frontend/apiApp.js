@@ -432,8 +432,8 @@ apiApp.post('/api/orders', async (req, res) => {
 
     const actualValue = subtotal * 5; // 80% savings
     const festiveDiscount = actualValue - subtotal;
-    const packingCharges = 150;
-    const grandTotal = subtotal + packingCharges;
+    const packingCharges = 0;
+    const grandTotal = subtotal;
 
     // Build WhatsApp message URL
     const STORE_WHATSAPP_NUMBER = '918973015070';
@@ -453,7 +453,6 @@ apiApp.post('/api/orders', async (req, res) => {
     msg += `--------------------------------------\n`;
     msg += `💰 *Subtotal:* ₹${subtotal.toFixed(0)}\n`;
     msg += `🎉 *You Saved:* ₹${festiveDiscount.toFixed(0)} (80% Off)\n`;
-    msg += `🚚 *Packing & Transport:* ₹${packingCharges}\n`;
     msg += `⭐ *TOTAL PAYABLE:* ₹${grandTotal.toFixed(0)}\n`;
     msg += `--------------------------------------\n`;
     msg += `Please confirm my order and share bank/UPI details! 🙏`;
