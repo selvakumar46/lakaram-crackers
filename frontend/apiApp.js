@@ -7,9 +7,9 @@ const { Pool } = pkg;
 
 const apiApp = express();
 
-// Enable CORS and reasonable limit for API payloads
+// Enable CORS and reasonable limit for API payloads (accommodates 5MB image uploads)
 apiApp.use(cors());
-apiApp.use(express.json({ limit: '2mb' }));
+apiApp.use(express.json({ limit: '10mb' }));
 
 // In-Memory Fallback Cache (Ensures store never returns 500 even if Neon DB exceeds quota)
 let inMemoryProductsCache = [...DEFAULT_PRODUCTS];
