@@ -56,3 +56,19 @@
 .crimson-gradient-bg {
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
 }
+
+/* Toast slide-up animation */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.25s ease-out forwards;
+}

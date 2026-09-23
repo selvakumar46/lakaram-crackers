@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   X, 
   Trash2, 
@@ -9,11 +9,34 @@ import {
   Truck, 
   ArrowRight,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
+
+// Inline sub-component so each cart item manages its own imgError state
+function CartItemImage({ src, alt }) {
+  const [errored, setErrored] = useState(false);
+  if (!src || errored) {
+    return (
+      <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-[#1a1f35] to-[#101320] flex items-center justify-center flex-shrink-0 border border-slate-800">
+        <Sparkles className="w-6 h-6 text-amber-400/50" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setErrored(true)}
+      className="w-16 h-16 rounded-lg object-cover bg-slate-900 flex-shrink-0"
+    />
+  );
+}
+
 export default function CartDrawer() {
+
   const {
     isCartOpen,
     setIsCartOpen,
@@ -76,11 +99,7 @@ export default function CartDrawer() {
                   key={product.id}
                   className="bg-[#161a29] rounded-xl p-3 border border-slate-800/80 flex gap-3 items-center"
                 >
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-16 h-16 rounded-lg object-cover bg-slate-900 flex-shrink-0"
-                  />
+                  <CartItemImage src={product.image} alt={product.name} />
                   <div className="flex-1 min-w-0">
                     <h4 className="text-xs font-bold text-white truncate mb-0.5">
                       {product.name}

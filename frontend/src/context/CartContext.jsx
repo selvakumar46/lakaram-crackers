@@ -53,6 +53,21 @@ export const CartProvider = ({ children }) => {
   const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [toasts, setToasts] = useState([]);
+
+  // Show a toast notification (auto-dismiss after 2.5s)
+  const showToast = (message, type = 'success') => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 2500);
+  };
+
+  const dismissToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
 
   useEffect(() => {
     try {
@@ -71,7 +86,13 @@ export const CartProvider = ({ children }) => {
   }, [wishlist]);
 
   const addToCart = (product, qty = 1) => {
+    // Show toast on first-time add (qty was 0 before)
+    const currentQty = cart[product.id] ? cart[product.id].quantity : 0;
+    if (qty > 0 && currentQty === 0) {
+      showToast(`🎆 ${product.name} added to cart!`);
+    }
     setCart(prev => {
+
       const existing = prev[product.id];
       const currentQty = existing ? existing.quantity : 0;
       const newQty = Math.max(0, currentQty + qty);
@@ -188,7 +209,10 @@ export const CartProvider = ({ children }) => {
       setCatalogProducts,
       categories,
       setCategories,
-      refreshCatalog
+      refreshCatalog,
+      toasts,
+      showToast,
+      dismissToast,
     }}>
       {children}
     </CartContext.Provider>
