@@ -43,7 +43,7 @@ export default function CartDrawer() {
       />
 
       {/* Drawer Container */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
         <div className="w-screen max-w-md bg-[#0f121e] border-l border-amber-500/20 shadow-2xl flex flex-col">
           {/* Header */}
           <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-[#151928]">
@@ -148,10 +148,12 @@ export default function CartDrawer() {
                   <span>Subtotal:</span>
                   <span className="text-slate-200 font-semibold">₹{subtotal.toFixed(0)}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Packing & Transport:</span>
-                  <span className="text-slate-200 font-medium">₹{packingCharges.toFixed(0)}</span>
-                </div>
+                {packingCharges > 0 && (
+                  <div className="flex justify-between text-slate-400">
+                    <span>Packing & Transport:</span>
+                    <span className="text-slate-200 font-medium">₹{packingCharges.toFixed(0)}</span>
+                  </div>
+                )}
                 <div className="pt-2 border-t border-slate-800 flex justify-between items-baseline">
                   <span className="text-sm font-bold text-white">Net Total:</span>
                   <span className="text-lg font-black text-amber-400">

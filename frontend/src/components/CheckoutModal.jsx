@@ -363,10 +363,12 @@ export default function CheckoutModal() {
                   <span>Festival Discount (80% Off):</span>
                   <span>- ₹{festiveSavings.toFixed(0)}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Packing & Transport:</span>
-                  <span className="text-slate-200 font-semibold">₹{packingCharges.toFixed(0)}</span>
-                </div>
+                {packingCharges > 0 && (
+                  <div className="flex justify-between text-slate-400">
+                    <span>Packing & Transport:</span>
+                    <span className="text-slate-200 font-semibold">₹{packingCharges.toFixed(0)}</span>
+                  </div>
+                )}
                 <div className="pt-2 border-t border-slate-700/80 flex justify-between items-baseline font-black">
                   <span className="text-sm text-white">Final Payable Amount:</span>
                   <span className="text-xl text-amber-400">₹{grandTotal.toFixed(0)}</span>

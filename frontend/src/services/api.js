@@ -189,8 +189,8 @@ export const submitOrder = async (orderPayload) => {
     const subtotal = orderPayload.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const actualValue = subtotal * 5;
     const festiveDiscount = actualValue - subtotal;
-    const packingAndForwarding = 150;
-    const grandTotal = subtotal + packingAndForwarding;
+    const packingAndForwarding = 0;
+    const grandTotal = subtotal;
     const totalItemCount = orderPayload.items.reduce((acc, item) => acc + item.quantity, 0);
 
     const storeNumber = '918973015070';
@@ -210,7 +210,6 @@ export const submitOrder = async (orderPayload) => {
     msg += `--------------------------------------\n`;
     msg += `💰 *Subtotal:* ₹${subtotal.toFixed(2)}\n`;
     msg += `🎉 *Festive Savings (80% Off):* ₹${festiveDiscount.toFixed(2)}\n`;
-    msg += `🚚 *Packing & Transport:* ₹${packingAndForwarding.toFixed(2)}\n`;
     msg += `⭐️ *TOTAL PAYABLE:* ₹${grandTotal.toFixed(2)}\n`;
     msg += `--------------------------------------\n`;
     msg += `Please confirm my order and share bank/UPI payment details! 🙏`;
