@@ -3,6 +3,20 @@ import { ChevronDown, Filter } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { CATEGORIES } from '../data/defaultProducts';
 
+const EMOJI_MAP = {
+  all: '🎆',
+  'sound-crackers': '⚡',
+  chakkars: '🌀',
+  'flower-pots': '🌋',
+  sparklers: '✨',
+  rockets: '🚀',
+  'aerial-shots': '🌠',
+  'atom-bombs': '💣',
+  garlands: '🧨',
+  'gift-boxes': '🎁',
+  'kids-special': '🧸'
+};
+
 export default function CategoryFilter() {
   const { selectedCategory, setSelectedCategory, catalogProducts, categories: dynamicCategories } = useCart();
 
@@ -21,6 +35,7 @@ export default function CategoryFilter() {
 
   const selectedCat = displayCategories.find(c => c.id === selectedCategory) || displayCategories[0];
   const selectedCount = getCount(selectedCategory || 'all');
+  const selectedEmoji = EMOJI_MAP[selectedCategory || 'all'] || '✨';
 
   return (
     <div className="w-full bg-[#111422] border-b border-slate-800/80 py-2.5 px-3 sm:px-6 lg:px-8">
@@ -59,13 +74,14 @@ export default function CategoryFilter() {
           >
             {displayCategories.map(cat => {
               const count = getCount(cat.id);
+              const emoji = EMOJI_MAP[cat.id] || '✨';
               return (
                 <option
                   key={cat.id}
                   value={cat.id}
                   className="bg-[#181c2d] text-slate-200"
                 >
-                  {cat.name}{count > 0 ? ` (${count})` : ''}
+                  {emoji} {cat.name}{count > 0 ? ` (${count})` : ''}
                 </option>
               );
             })}
@@ -82,7 +98,7 @@ export default function CategoryFilter() {
           <div className="flex items-center gap-2 mt-2">
             <span className="text-[11px] text-slate-400">Filtering:</span>
             <span className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[11px] font-semibold px-2.5 py-1 rounded-full">
-              {selectedCat?.name}
+              {selectedEmoji} {selectedCat?.name}
               <span className="bg-amber-500/30 text-amber-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
                 {selectedCount}
               </span>

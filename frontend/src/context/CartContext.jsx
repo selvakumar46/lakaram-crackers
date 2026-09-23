@@ -49,6 +49,7 @@ export const CartProvider = ({ children }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -197,6 +198,8 @@ export const CartProvider = ({ children }) => {
       setSearchQuery,
       isCartOpen,
       setIsCartOpen,
+      isWishlistOpen,
+      setIsWishlistOpen,
       isSafetyModalOpen,
       setIsSafetyModalOpen,
       isCheckoutOpen,

@@ -9,7 +9,8 @@ import {
   PhoneCall, 
   Zap,
   X,
-  Settings
+  Settings,
+  Heart
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
@@ -23,8 +24,11 @@ export default function Navbar() {
     viewMode,
     setViewMode,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    wishlist,
+    setIsWishlistOpen
   } = useCart();
+
 
   return (
     <header className="sticky top-0 z-40 w-full overflow-hidden">
@@ -144,6 +148,22 @@ export default function Navbar() {
             >
               <Settings className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
               <span className="hidden sm:inline text-xs font-semibold">Admin</span>
+            </button>
+
+            {/* Wishlist Button */}
+            <button
+              onClick={() => setIsWishlistOpen(true)}
+              className="relative p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-rose-400 bg-rose-950/40 border border-rose-500/30 hover:bg-rose-900/40 transition-colors flex items-center gap-1"
+              title="View Wishlist"
+            >
+              <Heart className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+              <span className="hidden sm:inline text-xs font-semibold">Wishlist</span>
+              {wishlist?.length > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                </span>
+              )}
             </button>
 
             {/* Cart Trigger — icon + count on mobile, full label on sm+ */}

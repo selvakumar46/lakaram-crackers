@@ -10,7 +10,8 @@ import {
   ArrowRight,
   ShieldCheck,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Share2
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
@@ -52,7 +53,8 @@ export default function CartDrawer() {
     addToCart,
     removeFromCart,
     clearCart,
-    setIsCheckoutOpen
+    setIsCheckoutOpen,
+    showToast
   } = useCart();
 
   if (!isCartOpen) return null;
@@ -203,13 +205,26 @@ export default function CartDrawer() {
               </button>
 
               <div className="flex justify-between items-center pt-1 text-[11px] text-slate-400">
-                <button
-                  onClick={clearCart}
-                  className="hover:text-red-400 transition-colors"
-                >
-                  Empty Basket
-                </button>
-                <span className="text-[10px] text-slate-500">🔒 Direct Sivakasi Transport Verified</span>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={clearCart}
+                    className="hover:text-red-400 transition-colors"
+                  >
+                    Empty Basket
+                  </button>
+                  <button
+                    onClick={() => {
+                      const text = cartItemsList.map(({product, quantity}) => `${quantity}x ${product.name}`).join('\n');
+                      navigator.clipboard.writeText(`My Firework Wishlist:\n${text}\n\nTotal: ₹${grandTotal.toFixed(0)}`);
+                      showToast('📋 Cart copied to clipboard!');
+                    }}
+                    className="flex items-center gap-1 hover:text-emerald-400 transition-colors"
+                  >
+                    <Share2 className="w-3 h-3" />
+                    Share Cart
+                  </button>
+                </div>
+                <span className="text-[10px] text-slate-500">🔒 Secure</span>
               </div>
             </div>
           )}

@@ -14,6 +14,7 @@ import Footer from './components/Footer';
 import Toast from './components/Toast';
 import BackToTop from './components/BackToTop';
 import SavingsBar from './components/SavingsBar';
+import WishlistDrawer from './components/WishlistDrawer';
 
 function MainStore() {
   const { viewMode, isAdminOpen, setIsAdminOpen } = useCart();
@@ -44,6 +45,7 @@ function MainStore() {
 
       {/* Modals & Overlays */}
       <CartDrawer />
+      <WishlistDrawer />
       <CheckoutModal />
       <OrderSuccessModal />
       <SafetyModal />
