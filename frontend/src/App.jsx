@@ -12,6 +12,8 @@ import SafetyModal from './components/SafetyModal';
 import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
+import BackToTop from './components/BackToTop';
+import SavingsBar from './components/SavingsBar';
 
 function MainStore() {
   const { viewMode, isAdminOpen, setIsAdminOpen } = useCart();
@@ -51,6 +53,12 @@ function MainStore() {
 
       {/* Toast Notifications */}
       <Toast />
+
+      {/* Back to Top Button */}
+      <BackToTop />
+
+      {/* Savings Bar — shows when cart has items in catalog mode */}
+      <SavingsBar />
 
       {/* Floating WhatsApp Button */}
       <a

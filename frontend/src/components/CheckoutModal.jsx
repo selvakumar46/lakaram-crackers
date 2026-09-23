@@ -47,6 +47,24 @@ export default function CheckoutModal() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isLookingUpPin, setIsLookingUpPin] = useState(false);
   const [pinLookupSuccess, setPinLookupSuccess] = useState('');
+  const [touched, setTouched] = useState({});
+
+  // Per-field validation rules
+  const fieldErrors = {
+    customerName: !formData.customerName.trim() ? 'Full name is required' : '',
+    phone: !formData.phone.trim() || formData.phone.replace(/\D/g, '').length < 10
+      ? 'Enter a valid 10-digit phone number' : '',
+    address: !formData.address.trim() ? 'Delivery address is required' : '',
+    pincode: formData.pincode.length < 6 ? 'Enter a valid 6-digit pincode' : '',
+  };
+
+  const handleBlur = (e) => {
+    setTouched(prev => ({ ...prev, [e.target.name]: true }));
+  };
+
+  const fieldClass = (name, base) =>
+    `${base} ${touched[name] && fieldErrors[name] ? 'border-red-500 focus:border-red-400' : 'border-slate-700 focus:border-amber-400'}`;
+
 
   if (!isCheckoutOpen) return null;
 
@@ -81,8 +99,11 @@ export default function CheckoutModal() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Mark all required fields as touched so errors are visible
+    setTouched({ customerName: true, phone: true, address: true, pincode: true });
+
     if (!formData.customerName || !formData.phone || !formData.address || !formData.pincode) {
-      setErrorMsg('Please complete all required address and contact fields.');
+      setErrorMsg('Please complete all required fields highlighted in red.');
       return;
     }
 
@@ -185,9 +206,13 @@ export default function CheckoutModal() {
                   required
                   value={formData.customerName}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="e.g. Selvaganapathy"
-                  className="w-full bg-[#181c2d] border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                  className={fieldClass('customerName', 'w-full bg-[#181c2d] border rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none')}
                 />
+                {touched.customerName && fieldErrors.customerName && (
+                  <p className="text-red-400 text-[11px] mt-1 flex items-center gap-1">⚠ {fieldErrors.customerName}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -201,9 +226,13 @@ export default function CheckoutModal() {
                     required
                     value={formData.phone}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="98765 43210"
-                    className="w-full bg-[#181c2d] border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                    className={fieldClass('phone', 'w-full bg-[#181c2d] border rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none')}
                   />
+                  {touched.phone && fieldErrors.phone && (
+                    <p className="text-red-400 text-[11px] mt-1">⚠ {fieldErrors.phone}</p>
+                  )}
                 </div>
 
                 <div>
@@ -231,9 +260,13 @@ export default function CheckoutModal() {
                   rows={2}
                   value={formData.address}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="No 12, Gandhi Road, Near Bus Stand"
-                  className="w-full bg-[#181c2d] border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
+                  className={fieldClass('address', 'w-full bg-[#181c2d] border rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none resize-none')}
                 />
+                {touched.address && fieldErrors.address && (
+                  <p className="text-red-400 text-[11px] mt-1">⚠ {fieldErrors.address}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-3 gap-2">
@@ -280,9 +313,13 @@ export default function CheckoutModal() {
                     maxLength={6}
                     value={formData.pincode}
                     onChange={handlePincodeChange}
+                    onBlur={handleBlur}
                     placeholder="600001"
-                    className="w-full bg-[#181c2d] border border-slate-700 rounded-xl py-2 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                    className={fieldClass('pincode', 'w-full bg-[#181c2d] border rounded-xl py-2 px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none')}
                   />
+                  {touched.pincode && fieldErrors.pincode && (
+                    <p className="text-red-400 text-[11px] mt-1">⚠ {fieldErrors.pincode}</p>
+                  )}
                 </div>
               </div>
 
